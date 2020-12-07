@@ -1,0 +1,14 @@
+{
+  "xclbin-location":"/media/sd-mmcblk1p1/dpu.xclbin",
+  "ivas-library-repo": "./",
+  "kernels" :[
+    {
+      "kernel-name":"pp_pipeline_accel:pp_pipeline_accel_1",
+      "library-name":"libivas_xresize_bgr.so",
+      "config": {
+	      "mean_value": 128, 
+	      "scale_value": 1
+      }
+    }
+  ]
+}
