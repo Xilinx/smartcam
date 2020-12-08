@@ -15,8 +15,9 @@
 #
 
 w=${1:-"1920"} h=${2:-"1080"}
-source ./setupmipi.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${DIR}/setupmipi.sh
 
-./somapp --mipi ${media} --target dp  --w ${w} --h ${h} > /dev/null 2>&1 &
+${DIR}/somapp --mipi ${media} --target dp  --w ${w} --h ${h} > /dev/null 2>&1 &
 
 echo "dp display started."

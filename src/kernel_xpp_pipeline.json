@@ -1,5 +1,5 @@
 {
-  "xclbin-location":"/media/sd-mmcblk1p1/dpu.xclbin",
+  "xclbin-location":"/lib/firmware/kv260-aa1/kv260-aa1.xclbin",
   "ivas-library-repo": "/usr/lib/ivas",
   "kernels": [
     {

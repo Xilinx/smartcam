@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-echo "firmware: /media/sd-mmcblk1p1/dpu.xclbin" > /etc/vart.conf
-
 for media in $(ls /dev/media*); do
 	if [[ $(media-ctl -d ${media} -p | grep driver | grep xilinx-video | wc -l) -eq 1 ]]; then
 		echo "xilinx mipi:" ${media}

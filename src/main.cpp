@@ -24,6 +24,7 @@
 
 static char *port = (char *) DEFAULT_RTSP_PORT;
 
+static gchar* confdir = (gchar*)"/opt/xilinx/share/ivas";
 static gchar* filename = (gchar*)"";
 static gchar* infileType = (gchar*)"h264";
 static gchar* outMediaType = (gchar*)"h264";
@@ -106,13 +107,13 @@ main (int argc, char *argv[])
 
         if (!nodet) {
             sprintf(pip + strlen(pip), " ! tee name=t \
-                    ! queue ! ivas_xm2m kconfig=\"./kernel_xpp_pipeline.json\" \
+                    ! queue ! ivas_xm2m kconfig=\"%s/kernel_xpp_pipeline.json\" \
                     ! video/x-raw, width=640, height=360, format=BGR \
-                    ! queue ! ivas_xfilter kernels-config=\"./kernel_densebox_640_360.json\" \
+                    ! queue ! ivas_xfilter kernels-config=\"%s/kernel_densebox_640_360.json\" \
                     ! ima.sink_master \
                     ivas_xmetaaffixer name=ima ima.src_master ! fakesink \
                     t. \
-                    ! ima.sink_slave_0 ima.src_slave_0 ! ivas_xfilter kernels-config=\"./kernel_boundingbox_facedetect.json\" ");
+                    ! ima.sink_slave_0 ima.src_slave_0 ! ivas_xfilter kernels-config=\"%s/kernel_boundingbox_facedetect.json\" ", confdir, confdir, confdir);
         }
     }
 

@@ -16,10 +16,9 @@
 
 file=${1:-"/usr/share/somapp/movies/walking-people.nv12.30fps.1080p.h264"}
 w=${2:-"1920"} h=${3:-"1080"}
-source ./setupmipi.sh
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source ${DIR}/setupmipi.sh
 
-LD_LIBRARY_PATH="./" \
-GST_PLUGIN_PATH="./" \
-./somapp --file ${file} --infile-type h264 --target file  --w ${w} --h ${h} > /dev/null 2>&1 &
+${DIR}/somapp --file ${file} --infile-type h264 --target file  --w ${w} --h ${h} > /dev/null 2>&1 &
 
 echo "detection on file is started."

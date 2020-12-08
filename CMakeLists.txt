@@ -26,7 +26,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++14")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(GStreamer REQUIRED)
 
-SET(INSTALL_PATH "home/root/somapp")
+SET(INSTALL_PATH "opt/xilinx")
 
 
 
@@ -35,7 +35,7 @@ target_include_directories(somapp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(somapp
   gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 gstrtsp-1.0 gstrtspserver-1.0
   glib-2.0 gobject-2.0 )
-install(TARGETS somapp DESTINATION ${INSTALL_PATH})
+install(TARGETS somapp DESTINATION ${INSTALL_PATH}/bin)
 
 
 install(PROGRAMS
@@ -43,16 +43,22 @@ install(PROGRAMS
     script/02.mipi-dp.sh
     script/03.file-file.sh
     script/setupmipi.sh
+    DESTINATION ${INSTALL_PATH}/bin)
+
+install(FILES
+    README
+    DESTINATION ${INSTALL_PATH}/
+    RENAME      README_AA1
+    )
+
+install(FILES
     src/kernel_boundingbox_facedetect.json
     src/kernel_densebox_640_360.json
     src/kernel_xpp_pipeline.json
-    #    video/walking-people.nv12.30fps.1080p.h264
-    #    video/walking-people.nv12.30fps.4k.h264
-    README
-    DESTINATION ${INSTALL_PATH})
-install(PROGRAMS
-    notebook/LICENSE
-    notebook/AA1.ipynb
+    DESTINATION ${INSTALL_PATH}/share/ivas)
+
+install(DIRECTORY
+    notebook/
     DESTINATION usr/share/notebooks/somapp/)
 
 set(VERSION "1.0.1")
@@ -65,7 +71,6 @@ set(CPACK_PACKAGE_VENDOR "xilinx")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
-set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/home;/home/root")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_RPM_SPEC_MORE_DEFINE "%define _build_id_links none")
 include(CPack)
