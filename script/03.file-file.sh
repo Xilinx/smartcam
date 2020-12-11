@@ -19,6 +19,6 @@ w=${2:-"1920"} h=${3:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${DIR}/setupmipi.sh
 
-${DIR}/somapp --file ${file} --infile-type h264 --target file  --w ${w} --h ${h} > /dev/null 2>&1 &
+${DIR}/somapp --file ${file} --infile-type h264 --target file  --w ${w} --h ${h} > /dev/null 2>&1 
 
-echo "detection on file is started."
+echo "Output file is out.h264, please play with your favorite media player, such as VLC, ffplay, etc. to see the face detection results."

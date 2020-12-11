@@ -17,6 +17,5 @@ w=${1:-"1920"} h=${2:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${DIR}/setupmipi.sh
 
-${DIR}/somapp --mipi ${media} -t rtsp --w ${w} --h ${h} 2> /dev/null &
+${DIR}/somapp --mipi ${media} -t rtsp --w ${w} --h ${h} 2> /dev/null 
 
-echo "rtsp server started."
