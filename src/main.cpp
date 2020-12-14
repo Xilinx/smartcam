@@ -35,6 +35,7 @@ static gint usb = -1;
 static gint w = 1920;
 static gint h = 1080;
 static gboolean nodet = FALSE;
+static gboolean reportFps = FALSE;
 static GOptionEntry entries[] =
 {
     { "mipi", 'm', 0, G_OPTION_ARG_INT, &mipi, "mipi media id, e.g. 1 for /dev/media1", "media_ID"},
@@ -51,9 +52,33 @@ static GOptionEntry entries[] =
         "Port to listen on (default: " DEFAULT_RTSP_PORT ")", "5000"},
 
     { "nodet", 'n', 0, G_OPTION_ARG_NONE, &nodet, "no AI inference", NULL },
+    { "report", 'R', 0, G_OPTION_ARG_NONE, &reportFps, "report fps", NULL },
     { NULL }
 };
 
+static gboolean
+my_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
+{
+  GMainLoop *loop = (GMainLoop *) data;
+  switch (GST_MESSAGE_TYPE (message)) {
+    case GST_MESSAGE_INFO:{
+      GError *err;
+      gchar *debug;
+      gst_message_parse_info (message, &err, &debug);
+      g_print ("Info: %s\n", debug);
+      break;
+    }
+    case GST_MESSAGE_EOS:
+      g_print ("End of stream\n");
+      g_main_loop_quit (loop);
+      break;
+    default:
+      /* unhandled message */
+      break;
+  }
+
+  return TRUE;
+}
 
 int
 main (int argc, char *argv[])
@@ -65,6 +90,7 @@ main (int argc, char *argv[])
     GstRTSPSessionPool *session;
     GOptionContext *optctx;
     GError *error = NULL;
+    guint busWatchId;
 
     session = gst_rtsp_session_pool_new();
     gst_rtsp_session_pool_set_max_sessions  (session, 255);
@@ -86,6 +112,12 @@ main (int argc, char *argv[])
     char pip[2500];
     pip[0] = '\0';
 
+    char *perf = (char*)"";
+    if (reportFps)
+    {
+        perf = (char*)"! perf ";
+    }
+
     if (std::string(target) == "rtsp")
     {
         sprintf(pip + strlen(pip), "( ");
@@ -96,7 +128,7 @@ main (int argc, char *argv[])
                     "filesrc location=%s ! %sparse ! queue ! omx%sdec ! video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", filename, infileType, infileType, w, h, fr);
         } else if (mipi > -1) {
             sprintf(pip + strlen(pip), 
-                    "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=30/1 ", mipi, (w==1920? " v4l2src0::io-mode=dmbuf-import" : ""), w, h );
+                    "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=30/1 ", mipi, (w==1920 && h==1080 && nodet && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf-import" : ""), w, h );
         } else if (usb > -1) {
             sprintf(pip + strlen(pip), 
                     "v4l2src name=videosrc device=/dev/video%d !  video/x-raw, width=%d, height=%d ! videoconvert \
@@ -131,7 +163,7 @@ main (int argc, char *argv[])
                 control-rate=low-latency                      gop-mode=low-delay-p gdr-mode=horizontal cpb-size=200 \
                 initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false \
                 ! video/x-%s, alignment=au \
-                ! queue ! rtp%spay name=pay0 pt=96 )", outMediaType, outMediaType, outMediaType);
+                ! queue %s ! rtp%spay name=pay0 pt=96 )", outMediaType, outMediaType, perf, outMediaType);
 
         gst_rtsp_media_factory_set_launch (factory, pip);
         gst_rtsp_media_factory_set_shared (factory, TRUE);
@@ -153,28 +185,28 @@ main (int argc, char *argv[])
             sprintf(pip + strlen(pip), "\
                 ! queue ! omx%senc qp-mode=auto num-slices=8 gop-length=60 periodicity-idr=270 \
                 control-rate=low-latency                      gop-mode=low-delay-p gdr-mode=horizontal cpb-size=200 \
-                initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false \
-                ! filesink location=./out.%s", outMediaType, outMediaType);
+                initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false %s \
+                ! filesink location=./out.%s", outMediaType, perf, outMediaType);
         }
         else if (std::string(target) == "dp")
         {
             sprintf(pip + strlen(pip), "\
-                    ! queue ! kmssink driver-name=xlnx plane-id=39 sync=false fullscreen-overlay=true");
+                    ! queue %s ! kmssink driver-name=xlnx plane-id=39 sync=false fullscreen-overlay=true", perf);
         }
 
         GstElement *pipeline = gst_parse_launch(pip, NULL);
         gst_element_set_state (pipeline, GST_STATE_PLAYING);
         /* Wait until error or EOS */
         GstBus *bus = gst_element_get_bus (pipeline);
-        GstMessage *msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE,
-                    (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS) );
+        loop = g_main_loop_new (NULL, FALSE);
+        busWatchId = gst_bus_add_watch (bus, my_bus_callback, loop);
+        g_main_loop_run (loop);
 
-        /* Free resources */
-        if (msg != NULL)
-            gst_message_unref (msg);
         gst_object_unref (bus);
         gst_element_set_state (pipeline, GST_STATE_NULL);
         gst_object_unref (pipeline);
+        g_source_remove (busWatchId);
+        g_main_loop_unref (loop);
     }
     return 0;
 }
