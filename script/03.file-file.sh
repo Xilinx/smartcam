@@ -17,7 +17,6 @@
 file=${1:-"/usr/share/somapp/movies/walking-people.nv12.30fps.1080p.h264"}
 w=${2:-"1920"} h=${3:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source ${DIR}/setupmipi.sh
 
 ${DIR}/somapp --file ${file} --infile-type h264 --target file  --w ${w} --h ${h} > /dev/null 2>&1 
 

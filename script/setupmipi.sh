@@ -19,11 +19,13 @@ for media in $(ls /dev/media*); do
 		echo "xilinx mipi:" ${media}
 		video=$(media-ctl -p -d ${media} | grep "/dev/video"| sed 's/.*\/dev\/video\(.\)/\1/')
 		findmipi=1
+		break
 	fi
 done
 
 if [[ ${findmipi} -ne 1 ]]; then
 	echo "not find mipi"
+	exit 1
 fi
 
 media=${media/\/dev\/media/}
