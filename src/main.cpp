@@ -128,7 +128,7 @@ main (int argc, char *argv[])
                     "filesrc location=%s ! %sparse ! queue ! omx%sdec ! video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", filename, infileType, infileType, w, h, fr);
         } else if (mipi > -1) {
             sprintf(pip + strlen(pip), 
-                    "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=30/1 ", mipi, (w==1920 && h==1080 && nodet && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf-import" : ""), w, h );
+                    "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=30/1 ", mipi, (w==1920 && h==1080 && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf v4l2src0::stride-align=256" : ""), w, h );
         } else if (usb > -1) {
             sprintf(pip + strlen(pip), 
                     "v4l2src name=videosrc device=/dev/video%d !  video/x-raw, width=%d, height=%d ! videoconvert \
@@ -145,7 +145,7 @@ main (int argc, char *argv[])
                     ! ima.sink_master \
                     ivas_xmetaaffixer name=ima ima.src_master ! fakesink \
                     t. \
-                    ! ima.sink_slave_0 ima.src_slave_0 ! ivas_xfilter kernels-config=\"%s/kernel_boundingbox_facedetect.json\" ", confdir, confdir, confdir);
+                    ! queue ! ima.sink_slave_0 ima.src_slave_0 ! queue ! ivas_xfilter kernels-config=\"%s/kernel_boundingbox_facedetect.json\" ", confdir, confdir, confdir);
         }
     }
 
