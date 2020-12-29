@@ -18,6 +18,11 @@
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
 #include <string>
+#include <array>
+#include <vector>
+#include <sstream>
+#include <memory>
+#include <stdexcept>
 
 #define DEFAULT_RTSP_PORT "5000"
 
@@ -72,6 +77,13 @@ my_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
       g_print ("End of stream\n");
       g_main_loop_quit (loop);
       break;
+    case GST_MESSAGE_ERROR:{
+      GError *err;
+      gchar *debug;
+      gst_message_parse_error (message, &err, &debug);
+      g_print ("Error: %s\n", debug);
+      break;
+    }
     default:
       /* unhandled message */
       break;
@@ -79,6 +91,41 @@ my_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
 
   return TRUE;
 }
+
+
+
+
+
+static std::string exec(const char* cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+    return result;
+}
+
+static std::vector<std::string> GetIp()
+{
+    std::string s = exec("ifconfig | grep 'inet addr' | sed 's/.*inet addr:\\([^ ]*\\).*/\\1/'");
+
+    std::vector<std::string> rarray;
+    std::size_t pos;
+    while ((pos = s.find("\n")) != std::string::npos) {
+        std::string token = s.substr(0, pos);
+        if (token != "127.0.0.1") {
+            rarray.push_back(token);
+        }
+        s.erase(0, pos + std::string("\n").length());
+    }
+
+    return rarray;
+}
+
 
 int
 main (int argc, char *argv[])
@@ -175,7 +222,13 @@ main (int argc, char *argv[])
         gst_rtsp_server_attach (server, NULL);
 
         /* start serving */
-        g_print ("stream ready at rtsp://127.0.0.1:%s/test\n", port);
+        std::vector<std::string> ips = GetIp();
+        std::ostringstream addr("");
+        for (auto&ip : ips)
+        {
+            addr << "rtsp://" << ip << ":" << port << "/test\n";
+        }
+        g_print ("stream ready at:\n %s", addr.str().c_str());
         g_main_loop_run (loop);
     }
     else
