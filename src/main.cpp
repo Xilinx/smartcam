@@ -178,11 +178,10 @@ main (int argc, char *argv[])
                     "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=30/1 ", mipi, (w==1920 && h==1080 && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf v4l2src0::stride-align=256" : ""), w, h );
         } else if (usb > -1) {
             sprintf(pip + strlen(pip), 
-                    "v4l2src name=videosrc device=/dev/video%d !  video/x-raw, width=%d, height=%d ! videoconvert \
+                    "v4l2src name=videosrc device=/dev/video%d io-mode=mmap %s !  video/x-raw, width=%d, height=%d ! videoconvert \
                     ! video/x-raw, format=NV12",
-                    usb, w, h );
+                    usb, (w==1920 && h==1080 && std::string(target) == "dp" ? "stride-align=256" : ""), w, h );
         }
-                    //! aipreprocess model-name=densebox_640_360 hwpp=0 \
 
         if (!nodet) {
             sprintf(pip + strlen(pip), " ! tee name=t \
