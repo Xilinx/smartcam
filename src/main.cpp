@@ -41,6 +41,7 @@ static gint w = 1920;
 static gint h = 1080;
 static gboolean nodet = FALSE;
 static gboolean reportFps = FALSE;
+static gboolean roiOff = FALSE;
 static GOptionEntry entries[] =
 {
     { "mipi", 'm', 0, G_OPTION_ARG_INT, &mipi, "mipi media id, e.g. 1 for /dev/media1", "media_ID"},
@@ -58,6 +59,7 @@ static GOptionEntry entries[] =
 
     { "nodet", 'n', 0, G_OPTION_ARG_NONE, &nodet, "no AI inference", NULL },
     { "report", 'R', 0, G_OPTION_ARG_NONE, &reportFps, "report fps", NULL },
+    { "ROI-off", 0, 0, G_OPTION_ARG_NONE, &roiOff, "trun off ROI", NULL },
     { NULL }
 };
 
@@ -204,12 +206,16 @@ main (int argc, char *argv[])
         factory = gst_rtsp_media_factory_new ();
 
         sprintf(pip + strlen(pip), " \
-                ! queue ! ivas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 \
-                ! queue ! omx%senc qp-mode=auto num-slices=8 gop-length=60 periodicity-idr=270 \
+                %s \
+                ! queue ! omx%senc qp-mode=%s  num-slices=8 gop-length=60 periodicity-idr=270 \
                 control-rate=low-latency                      gop-mode=low-delay-p gdr-mode=horizontal cpb-size=200 \
                 initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false \
                 ! video/x-%s, alignment=au \
-                ! queue %s ! rtp%spay name=pay0 pt=96 )", outMediaType, outMediaType, perf, outMediaType);
+                ! queue %s ! rtp%spay name=pay0 pt=96 )",
+                roiOff ? "" : " ! queue ! ivas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
+                outMediaType,
+                roiOff ? "auto" : "1",
+                outMediaType, perf, outMediaType);
 
         gst_rtsp_media_factory_set_launch (factory, pip);
         gst_rtsp_media_factory_set_shared (factory, TRUE);
