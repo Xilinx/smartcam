@@ -48,8 +48,8 @@ static GOptionEntry entries[] =
     { "usb", 'u', 0, G_OPTION_ARG_INT, &usb, "usb camera video device id, e.g. 2 for /dev/video2", "video_ID"},
     { "file", 'f', 0, G_OPTION_ARG_STRING, &filename, "location of h26x file as input", "file path"},
     { "infile-type", 'i', 0, G_OPTION_ARG_STRING, &infileType, "input file type: [h264 | h265]", "h264"},
-    { "w", 'w', 0, G_OPTION_ARG_INT, &w, "resolution w of the input", "1920"},
-    { "h", 'h', 0, G_OPTION_ARG_INT, &h, "resolution h of the input", "1080"},
+    { "width", 'W', 0, G_OPTION_ARG_INT, &w, "resolution w of the input", "1920"},
+    { "height", 'H', 0, G_OPTION_ARG_INT, &h, "resolution h of the input", "1080"},
     { "framerate", 'r', 0, G_OPTION_ARG_INT, &fr, "framerate of the input", "30"},
 
     { "target", 't', 0, G_OPTION_ARG_STRING, &target, "[dp|rtsp|file]", "dp"},

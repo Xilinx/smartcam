@@ -18,5 +18,5 @@ w=${1:-"1920"} h=${2:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source ${DIR}/setupmipi.sh
 
-${DIR}/somapp --mipi ${media} --target dp  --w ${w} --h ${h} > /dev/null 2>&1 
+${DIR}/somapp --mipi ${media} --target dp  --width ${w} --height ${h} > /dev/null 2>&1 
 
