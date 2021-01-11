@@ -42,6 +42,7 @@ install(PROGRAMS
     script/01.mipi-rtsp.sh
     script/02.mipi-dp.sh
     script/03.file-file.sh
+    script/04.file-ssd-dp.sh
     script/setupmipi.sh
     DESTINATION ${INSTALL_PATH}/bin)
 
@@ -51,11 +52,16 @@ install(FILES
     RENAME      README_AA1
     )
 
+install(DIRECTORY
+    config/facedetect
+    config/refinedet
+    config/ssd
+    DESTINATION ${INSTALL_PATH}/share/ivas/)
+
 install(FILES
-    src/kernel_boundingbox_facedetect.json
-    src/kernel_densebox_640_360.json
-    src/kernel_xpp_pipeline.json
-    DESTINATION ${INSTALL_PATH}/share/ivas)
+    config/ssd/label.json
+    DESTINATION usr/share/vitis_ai_library/models/ssd_adas_pruned_0_95/
+    )
 
 install(DIRECTORY
     notebook/

@@ -29,11 +29,11 @@
 
 static char *port = (char *) DEFAULT_RTSP_PORT;
 
-static gchar* confdir = (gchar*)"/opt/xilinx/share/ivas";
 static gchar* filename = (gchar*)"";
 static gchar* infileType = (gchar*)"h264";
 static gchar* outMediaType = (gchar*)"h264";
 static gchar* target = (gchar*)"dp";
+static gchar* aitask = (gchar*)"facedetect";
 static gint   fr = 30;
 static gint mipi = -1;
 static gint usb = -1;
@@ -57,6 +57,7 @@ static GOptionEntry entries[] =
     { "port", 'p', 0, G_OPTION_ARG_STRING, &port,
         "Port to listen on (default: " DEFAULT_RTSP_PORT ")", "5000"},
 
+    { "aitask", 'a', 0, G_OPTION_ARG_STRING, &aitask, "select AI task to be run: [facedetect|ssd|refinedet]" },
     { "nodet", 'n', 0, G_OPTION_ARG_NONE, &nodet, "no AI inference", NULL },
     { "report", 'R', 0, G_OPTION_ARG_NONE, &reportFps, "report fps", NULL },
     { "ROI-off", 0, 0, G_OPTION_ARG_NONE, &roiOff, "trun off ROI", NULL },
@@ -158,6 +159,8 @@ main (int argc, char *argv[])
 
     loop = g_main_loop_new (NULL, FALSE);
 
+    std::string confdir("/opt/xilinx/share/ivas/");
+    confdir += (aitask);
     char pip[2500];
     pip[0] = '\0';
 
@@ -187,13 +190,12 @@ main (int argc, char *argv[])
 
         if (!nodet) {
             sprintf(pip + strlen(pip), " ! tee name=t \
-                    ! queue ! ivas_xm2m kconfig=\"%s/kernel_xpp_pipeline.json\" \
-                    ! video/x-raw, width=640, height=360, format=BGR \
-                    ! queue ! ivas_xfilter kernels-config=\"%s/kernel_densebox_640_360.json\" \
+                    ! queue ! ivas_xm2m kconfig=\"%s/preprocess.json\" \
+                    ! queue ! ivas_xfilter kernels-config=\"%s/aiinference.json\" \
                     ! ima.sink_master \
                     ivas_xmetaaffixer name=ima ima.src_master ! fakesink \
                     t. \
-                    ! queue ! ima.sink_slave_0 ima.src_slave_0 ! queue ! ivas_xfilter kernels-config=\"%s/kernel_boundingbox_facedetect.json\" ", confdir, confdir, confdir);
+                    ! queue ! ima.sink_slave_0 ima.src_slave_0 ! queue ! ivas_xfilter kernels-config=\"%s/drawresult.json\" ", confdir.c_str(), confdir.c_str(), confdir.c_str());
         }
     }
 
