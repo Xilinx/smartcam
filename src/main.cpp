@@ -60,7 +60,7 @@ static GOptionEntry entries[] =
     { "aitask", 'a', 0, G_OPTION_ARG_STRING, &aitask, "select AI task to be run: [facedetect|ssd|refinedet]" },
     { "nodet", 'n', 0, G_OPTION_ARG_NONE, &nodet, "no AI inference", NULL },
     { "report", 'R', 0, G_OPTION_ARG_NONE, &reportFps, "report fps", NULL },
-    { "ROI-off", 0, 0, G_OPTION_ARG_NONE, &roiOff, "trun off ROI", NULL },
+    { "ROI-off", 0, 0, G_OPTION_ARG_NONE, &roiOff, "turn off ROI", NULL },
     { NULL }
 };
 
