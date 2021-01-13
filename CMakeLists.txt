@@ -16,7 +16,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(SoMApp)
+project(smartcam_aa1)
 
 SET(CMAKE_INSTALL_PREFIX $ENV{OECORE_TARGET_SYSROOT})
 
@@ -30,12 +30,12 @@ SET(INSTALL_PATH "opt/xilinx")
 
 
 
-add_executable(somapp src/main.cpp)
-target_include_directories(somapp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(somapp
+add_executable(smartcam_aa1 src/main.cpp)
+target_include_directories(smartcam_aa1 PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(smartcam_aa1
   gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 gstrtsp-1.0 gstrtspserver-1.0
   glib-2.0 gobject-2.0 )
-install(TARGETS somapp DESTINATION ${INSTALL_PATH}/bin)
+install(TARGETS smartcam_aa1 DESTINATION ${INSTALL_PATH}/bin)
 
 
 install(PROGRAMS
@@ -65,12 +65,12 @@ install(FILES
 
 install(DIRECTORY
     notebook/
-    DESTINATION usr/share/notebooks/somapp/)
+    DESTINATION usr/share/notebooks/smartcam_aa1/)
 
 set(VERSION "1.0.1")
 set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_GENERATOR "RPM")
-set(CPACK_PACKAGE_NAME "SoMApp")
+set(CPACK_PACKAGE_NAME "SmartCam_aa1")
 set(CPACK_PACKAGE_RELEASE 1)
 set(CPACK_PACKAGE_CONTACT "Yuxiz@xilinx.com")
 set(CPACK_PACKAGE_VENDOR "xilinx")
