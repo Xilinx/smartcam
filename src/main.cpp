@@ -177,7 +177,9 @@ main (int argc, char *argv[])
     {
         if (std::string(filename) != "") {
             sprintf(pip + strlen(pip), 
-                    "filesrc location=%s ! %sparse ! queue ! omx%sdec ! video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", filename, infileType, infileType, w, h, fr);
+                    "%s location=%s ! %sparse ! queue ! omx%sdec ! video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", 
+                    (std::string(target) == "file") ? "filesrc" : "multifilesrc",
+                    filename, infileType, infileType, w, h, fr);
         } else if (mipi > -1) {
             sprintf(pip + strlen(pip), 
                     "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=30/1 ", mipi, (w==1920 && h==1080 && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf v4l2src0::stride-align=256" : ""), w, h );
