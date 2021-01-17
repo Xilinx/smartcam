@@ -260,7 +260,6 @@ main (int argc, char *argv[])
         gst_element_set_state (pipeline, GST_STATE_PLAYING);
         /* Wait until error or EOS */
         GstBus *bus = gst_element_get_bus (pipeline);
-        loop = g_main_loop_new (NULL, FALSE);
         busWatchId = gst_bus_add_watch (bus, my_bus_callback, loop);
         g_main_loop_run (loop);
 
