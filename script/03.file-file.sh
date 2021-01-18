@@ -18,6 +18,4 @@ file=${1:-"/usr/share/somapp/movies/walking-people.nv12.30fps.1080p.h264"}
 w=${2:-"1920"} h=${3:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-${DIR}/smartcam_aa1 --file ${file} --infile-type h264 --target file  --width ${w} --height ${h} > /dev/null 2>&1 
-
-echo "Output file is out.h264, please play with your favorite media player, such as VLC, ffplay, etc. to see the face detection results."
+${DIR}/smartcam_aa1 --file ${file} --infile-type h264 --target file  --width ${w} --height ${h}

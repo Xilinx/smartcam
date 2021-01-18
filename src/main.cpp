@@ -29,7 +29,7 @@
 
 static char *port = (char *) DEFAULT_RTSP_PORT;
 
-static gchar* filename = (gchar*)"";
+static gchar* filename = NULL;
 static gchar* infileType = (gchar*)"h264";
 static gchar* outMediaType = (gchar*)"h264";
 static gchar* target = (gchar*)"dp";
@@ -46,7 +46,7 @@ static GOptionEntry entries[] =
 {
     { "mipi", 'm', 0, G_OPTION_ARG_INT, &mipi, "mipi media id, e.g. 1 for /dev/media1", "media_ID"},
     { "usb", 'u', 0, G_OPTION_ARG_INT, &usb, "usb camera video device id, e.g. 2 for /dev/video2", "video_ID"},
-    { "file", 'f', 0, G_OPTION_ARG_STRING, &filename, "location of h26x file as input", "file path"},
+    { "file", 'f', 0, G_OPTION_ARG_FILENAME, &filename, "location of h26x file as input", "file path"},
     { "infile-type", 'i', 0, G_OPTION_ARG_STRING, &infileType, "input file type: [h264 | h265]", "h264"},
     { "width", 'W', 0, G_OPTION_ARG_INT, &w, "resolution w of the input", "1920"},
     { "height", 'H', 0, G_OPTION_ARG_INT, &h, "resolution h of the input", "1080"},
@@ -84,7 +84,7 @@ my_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
       GError *err;
       gchar *debug;
       gst_message_parse_error (message, &err, &debug);
-      g_print ("Error: %s\n", debug);
+      g_printerr ("Error: %s\n", debug);
       break;
     }
     default:
@@ -129,6 +129,20 @@ static std::vector<std::string> GetIp()
     return rarray;
 }
 
+static std::vector<std::string> GetMonitorResolution()
+{
+    std::string s = exec("modetest -M xlnx -c| awk '/name refresh/ {f=1;next}  /props:/{f=0;} f{print $1} '");
+
+    std::vector<std::string> rarray;
+    std::size_t pos;
+    while ((pos = s.find("\n")) != std::string::npos) {
+        std::string token = s.substr(0, pos);
+        rarray.push_back(token);
+        s.erase(0, pos + std::string("\n").length());
+    }
+
+    return rarray;
+}
 
 int
 main (int argc, char *argv[])
@@ -157,6 +171,36 @@ main (int argc, char *argv[])
     }
     g_option_context_free (optctx);
 
+    if (!filename && mipi == -1 && usb == -1)
+    {
+      g_printerr ("Error: No input is given by -m / -u / -f .\n");
+      return 1;
+    }
+
+    if (filename && access( filename, F_OK ) != 0 )
+    {
+      g_printerr ("Error: File specified by -f doesn't exist: %s .\n", filename);
+      return 1;
+    }
+
+    std::vector<std::string> resV = GetMonitorResolution();
+    std::ostringstream inputRes;
+    inputRes << w << "x" << h;
+    bool match = false;
+    for (const auto &res : resV)
+    {
+        if ( res == inputRes.str() )
+        {
+            match = true;
+        }
+    }
+    if (!match)
+    {
+      g_printerr ("Error: Monitor doesn't support resolution %s\n", inputRes.str().c_str());
+      return 1;
+    }
+
+
     loop = g_main_loop_new (NULL, FALSE);
 
     std::string confdir("/opt/xilinx/share/ivas/");
@@ -175,7 +219,7 @@ main (int argc, char *argv[])
         sprintf(pip + strlen(pip), "( ");
     }
     {
-        if (std::string(filename) != "") {
+        if (filename) {
             sprintf(pip + strlen(pip), 
                     "%s location=%s ! %sparse ! queue ! omx%sdec ! video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", 
                     (std::string(target) == "file") ? "filesrc" : "multifilesrc",
@@ -263,6 +307,8 @@ main (int argc, char *argv[])
         busWatchId = gst_bus_add_watch (bus, my_bus_callback, loop);
         g_main_loop_run (loop);
 
+        g_print("Output file is out.%s, please play with your favorite media player, such as VLC, ffplay, etc. to see the video with %s AI results.\n", 
+                outMediaType, nodet ? "no" : aitask);
         gst_object_unref (bus);
         gst_element_set_state (pipeline, GST_STATE_NULL);
         gst_object_unref (pipeline);

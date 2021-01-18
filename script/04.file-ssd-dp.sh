@@ -18,5 +18,5 @@ file=${1:-"/usr/share/somapp/movies/Road-Adas.nv12.30fps.1080p.h264"}
 w=${1:-"1920"} h=${2:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-${DIR}/smartcam_aa1 --file ${file} --target dp  --width ${w} --height ${h} -r 30 --aitask ssd > /dev/null 2>&1 
+${DIR}/smartcam_aa1 --file ${file} --target dp  --width ${w} --height ${h} -r 30 --aitask ssd 
 
