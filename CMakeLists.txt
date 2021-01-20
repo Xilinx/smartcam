@@ -28,6 +28,11 @@ find_package(GStreamer REQUIRED)
 
 SET(INSTALL_PATH "opt/xilinx")
 
+add_library(ivas_xpp SHARED src/ivas_xpp_pipeline.c)
+target_include_directories(ivas_xpp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(ivas_xpp
+  jansson ivasutil gstivasinfermeta-1.0)
+install(TARGETS ivas_xpp DESTINATION ${INSTALL_PATH}/lib)
 
 
 add_executable(smartcam_aa1 src/main.cpp)
