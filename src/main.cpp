@@ -192,7 +192,7 @@ main (int argc, char *argv[])
 
         if (!nodet) {
             sprintf(pip + strlen(pip), " ! tee name=t \
-                    ! queue ! ivas_xm2m kconfig=\"%s/preprocess.json\" \
+                    ! queue ! ivas_xmultisrc kconfig=\"%s/preprocess.json\" \
                     ! queue ! ivas_xfilter kernels-config=\"%s/aiinference.json\" \
                     ! ima.sink_master \
                     ivas_xmetaaffixer name=ima ima.src_master ! fakesink \
