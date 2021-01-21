@@ -1,5 +1,5 @@
 {
-  "xclbin-location":"/lib/firmware/kv260-aa1/kv260-aa1.xclbin",
+  "xclbin-location":"/lib/firmware/xilinx/kv260-aa1/kv260-aa1.xclbin",
   "ivas-library-repo": "/opt/xilinx/lib",
   "kernels": [
     {
