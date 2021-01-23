@@ -61,7 +61,7 @@ install(DIRECTORY
     config/facedetect
     config/refinedet
     config/ssd
-    DESTINATION ${INSTALL_PATH}/share/ivas/)
+    DESTINATION ${INSTALL_PATH}/share/smartcam_aa1/)
 
 install(FILES
     config/ssd/label.json
