@@ -129,10 +129,11 @@ static std::vector<std::string> GetIp()
     return rarray;
 }
 
-static std::vector<std::string> GetMonitorResolution()
+static std::vector<std::string> GetMonitorResolution(std::string& all)
 {
-    std::string s = exec("modetest -M xlnx -c| awk '/name refresh/ {f=1;next}  /props:/{f=0;} f{print $1} '");
+    all = exec("modetest -M xlnx -c| awk '/name refresh/ {f=1;next}  /props:/{f=0;} f{print $1} '");
 
+    std::string s = all;
     std::vector<std::string> rarray;
     std::size_t pos;
     while ((pos = s.find("\n")) != std::string::npos) {
@@ -183,7 +184,8 @@ main (int argc, char *argv[])
       return 1;
     }
 
-    std::vector<std::string> resV = GetMonitorResolution();
+    std::string allres;
+    std::vector<std::string> resV = GetMonitorResolution(allres);
     std::ostringstream inputRes;
     inputRes << w << "x" << h;
     bool match = false;
@@ -196,7 +198,7 @@ main (int argc, char *argv[])
     }
     if (!match)
     {
-      g_printerr ("Error: Monitor doesn't support resolution %s\n", inputRes.str().c_str());
+      g_printerr ("Error: Monitor doesn't support resolution %s\nAll supported resolution:\n%s\n", inputRes.str().c_str(), allres.c_str());
       return 1;
     }
 
