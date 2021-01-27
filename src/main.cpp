@@ -258,6 +258,15 @@ main (int argc, char *argv[])
         mounts = gst_rtsp_server_get_mount_points (server);
         factory = gst_rtsp_media_factory_new ();
 
+
+        if (filename && std::string(infileType) == std::string(outMediaType) && nodet)
+        {
+            sprintf(pip, "( multifilesrc location=%s ! %sparse !rtp%spay name=pay0 pt=96 )",
+                    filename, infileType, outMediaType
+                    );
+        }
+        else
+        {
         sprintf(pip + strlen(pip), " \
                 %s \
                 ! queue ! omx%senc qp-mode=%s  num-slices=8 gop-length=60 periodicity-idr=270 \
@@ -269,6 +278,7 @@ main (int argc, char *argv[])
                 outMediaType,
                 roiOff ? "auto" : "1",
                 outMediaType, perf, outMediaType);
+        }
 
         gst_rtsp_media_factory_set_launch (factory, pip);
         gst_rtsp_media_factory_set_shared (factory, TRUE);
