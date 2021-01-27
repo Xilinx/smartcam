@@ -184,22 +184,25 @@ main (int argc, char *argv[])
       return 1;
     }
 
-    std::string allres;
-    std::vector<std::string> resV = GetMonitorResolution(allres);
-    std::ostringstream inputRes;
-    inputRes << w << "x" << h;
-    bool match = false;
-    for (const auto &res : resV)
+    if (std::string(target) == "dp")
     {
-        if ( res == inputRes.str() )
+        std::string allres;
+        std::vector<std::string> resV = GetMonitorResolution(allres);
+        std::ostringstream inputRes;
+        inputRes << w << "x" << h;
+        bool match = false;
+        for (const auto &res : resV)
         {
-            match = true;
+            if ( res == inputRes.str() )
+            {
+                match = true;
+            }
         }
-    }
-    if (!match)
-    {
-      g_printerr ("Error: Monitor doesn't support resolution %s\nAll supported resolution:\n%s\n", inputRes.str().c_str(), allres.c_str());
-      return 1;
+        if (!match)
+        {
+            g_printerr ("Error: Monitor doesn't support resolution %s\nAll supported resolution:\n%s\n", inputRes.str().c_str(), allres.c_str());
+            return 1;
+        }
     }
 
 
