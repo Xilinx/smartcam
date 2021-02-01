@@ -74,6 +74,8 @@ my_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
       gchar *debug;
       gst_message_parse_info (message, &err, &debug);
       g_print ("Info: %s\n", debug);
+      g_free(debug);
+      g_error_free(err);
       break;
     }
     case GST_MESSAGE_EOS:
@@ -85,6 +87,8 @@ my_bus_callback (GstBus * bus, GstMessage * message, gpointer data)
       gchar *debug;
       gst_message_parse_error (message, &err, &debug);
       g_printerr ("Error: %s\n", debug);
+      g_free(debug);
+      g_error_free(err);
       break;
     }
     default:
@@ -131,7 +135,7 @@ static std::vector<std::string> GetIp()
 
 static std::vector<std::string> GetMonitorResolution(std::string& all)
 {
-    all = exec("modetest -M xlnx -c| awk '/name refresh/ {f=1;next}  /props:/{f=0;} f{print $1} '");
+    all = exec("modetest -M xlnx -c| awk '/name refresh/ {f=1;next}  /props:/{f=0;} f{print $1 \"@\" $2} '");
 
     std::string s = all;
     std::vector<std::string> rarray;
@@ -143,6 +147,106 @@ static std::vector<std::string> GetMonitorResolution(std::string& all)
     }
 
     return rarray;
+}
+
+static int CheckMIPISrc()
+{
+    if( !(w == 1920 && h == 1080 ) && !(w == 3840 && h == 2160) )
+    {
+        g_printerr("ERROR: MIPI src resolution can only be:\n  1) 1920x1080@30\n  2) 3840x2160@30\n");
+        return 1;
+    }
+    return 0;
+}
+
+static std::vector<std::string> GetUSBRes(std::string& all)
+{
+    std::ostringstream cmd;
+    cmd << "v4l2-ctl --list-formats-ext -d /dev/video" << usb << " | awk '/\\s*\\[/ {f=1;}  /MJPG/ {f=0;} /\\s*\\[/ {next} f && /Size/{print s; s=\"\"; print $3;} END{print s} f && /Interval:/{s=s $4 $5}' | awk 'NF'  | sed 's/\\((\\|)(\\|)\\)/ /g' ";
+    all = exec(cmd.str().c_str());
+    std::string s = all;
+    std::vector<std::string> rarray;
+    std::size_t pos;
+    while ((pos = s.find("\n")) != std::string::npos) {
+        std::string token = s.substr(0, pos);
+        rarray.push_back(token);
+        s.erase(0, pos + std::string("\n").length());
+    }
+
+    return rarray;
+}
+
+static int CheckUSBSrc()
+{
+    std::string allres;
+    std::vector<std::string> resV = GetUSBRes(allres);
+    std::ostringstream inputRes;
+    inputRes << w << "x" << h;
+    bool match = false;
+    for (int i = 0; i < resV.size(); i+=2)
+    {
+        if ( resV[i] == inputRes.str() )
+        {
+            match = true;
+        }
+    }
+    if (!match)
+    {
+        g_printerr ("Error: USB camera doesn't support resolution %s\nAll supported resolution:\n%s\n", inputRes.str().c_str(), allres.c_str());
+        return 1;
+    }
+
+    return 0;
+}
+
+static int CheckCoexistSrc()
+{
+    std::string given("");
+    std::string msg("");
+    bool checkMipi = false, checkUsb = false;
+    if ( filename )
+    {
+        given = "File is given by -f, ";
+    }
+
+    if ( mipi > -1 )
+    {
+        if (given.size() > 0) 
+        {
+            msg = "mipi src is ignored.";
+        }
+        else
+        {
+            given = "MIPI is given by -m, ";
+            checkMipi = true;
+        }
+    }
+    if ( usb > -1 )
+    {
+        if (given.size() > 0) 
+        {
+            msg = "USB src is ignored.";
+        }
+        else
+        {
+            checkUsb = true;
+            given = "MIPI is given by -m, ";
+        }
+    }
+    if (msg.size() > 0)
+    {
+        g_print("WARNING: %s\n", msg.c_str());
+    }
+
+    if ( checkMipi  )
+    {
+        return CheckMIPISrc();
+    }
+    if ( checkUsb )
+    {
+        return CheckUSBSrc();
+    }
+    return 0;
 }
 
 int
@@ -184,6 +288,11 @@ main (int argc, char *argv[])
       return 1;
     }
 
+    if ( CheckCoexistSrc() != 0 )
+    {
+        return 1;
+    }
+
     if (std::string(target) == "dp")
     {
         std::string allres;
@@ -193,7 +302,9 @@ main (int argc, char *argv[])
         bool match = false;
         for (const auto &res : resV)
         {
-            if ( res == inputRes.str() )
+            std::size_t pos = res.find("@");
+            std::string wh = res.substr(0, pos);
+            if ( wh == inputRes.str() )
             {
                 match = true;
             }
@@ -231,7 +342,7 @@ main (int argc, char *argv[])
                     filename, infileType, infileType, w, h, fr);
         } else if (mipi > -1) {
             sprintf(pip + strlen(pip), 
-                    "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=30/1 ", mipi, (w==1920 && h==1080 && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf v4l2src0::stride-align=256" : ""), w, h );
+                    "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", mipi, (w==1920 && h==1080 && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf v4l2src0::stride-align=256" : ""), w, h, fr);
         } else if (usb > -1) {
             sprintf(pip + strlen(pip), 
                     "v4l2src name=videosrc device=/dev/video%d io-mode=mmap %s !  video/x-raw, width=%d, height=%d ! videoconvert \
