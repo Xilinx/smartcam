@@ -60,10 +60,10 @@
 
     3) File to File
        a) Invoking "03.file-to-file.sh"
-       b) Read in the sample video file from "/usr/share/somapp/movies/walking-people.nv12.30fps.1080p.h264",
+       b) Read in the sample video file from "/usr/share/somapp/movies/AA1/walking-people.nv12.30fps.1080p.h264",
           perform detection and generate video with detection bbox, save as ./out.h264
        c) Checking:
-          Play the input video file "/usr/share/somapp/movies/walking-people.nv12.30fps.1080p.h264" and generated video file 
+          Play the input video file "/usr/share/somapp/movies/AA1/walking-people.nv12.30fps.1080p.h264" and generated video file 
           "./out.h264" with any media player you prefer, e.g. VLC, ffplay.
           You should be able to see in the output video file, there are blue boxes around the faces of walking peoples, and the boxes
           should follow the movemnt of the faces, while there's no such boxes with the input video file.

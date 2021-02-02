@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-file=${1:-"/usr/share/somapp/movies/walking-people.nv12.30fps.1080p.h264"}
+file=${1:-"/usr/share/somapp/movies/AA1/walking-people.nv12.30fps.1080p.h264"}
 w=${2:-"1920"} h=${3:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
