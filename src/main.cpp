@@ -40,6 +40,7 @@ static gint usb = -1;
 static gint w = 1920;
 static gint h = 1080;
 static gboolean nodet = FALSE;
+static gboolean audio = FALSE;
 static gboolean reportFps = FALSE;
 static gboolean roiOff = FALSE;
 static GOptionEntry entries[] =
@@ -59,6 +60,7 @@ static GOptionEntry entries[] =
 
     { "aitask", 'a', 0, G_OPTION_ARG_STRING, &aitask, "select AI task to be run: [facedetect|ssd|refinedet]" },
     { "nodet", 'n', 0, G_OPTION_ARG_NONE, &nodet, "no AI inference", NULL },
+    { "audio", 'A', 0, G_OPTION_ARG_NONE, &audio, "RTSP with I2S audio", NULL },
     { "report", 'R', 0, G_OPTION_ARG_NONE, &reportFps, "report fps", NULL },
     { "ROI-off", 0, 0, G_OPTION_ARG_NONE, &roiOff, "turn off ROI", NULL },
     { NULL }
@@ -372,7 +374,7 @@ main (int argc, char *argv[])
 
         if (filename && std::string(infileType) == std::string(outMediaType) && nodet)
         {
-            sprintf(pip, "( multifilesrc location=%s ! %sparse !rtp%spay name=pay0 pt=96 )",
+            sprintf(pip, "( multifilesrc location=%s ! %sparse ",
                     filename, infileType, outMediaType
                     );
         }
@@ -384,11 +386,28 @@ main (int argc, char *argv[])
                 control-rate=low-latency                      gop-mode=low-delay-p gdr-mode=horizontal cpb-size=200 \
                 initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false \
                 ! video/x-%s, alignment=au \
-                ! queue %s ! rtp%spay name=pay0 pt=96 )",
+                ",
                 roiOff ? "" : " ! queue ! ivas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
-                outMediaType,
-                roiOff ? "auto" : "1",
-                outMediaType, perf, outMediaType);
+                outMediaType, roiOff ? "auto" : "1",
+                outMediaType
+                );
+        }
+
+        if (!audio)
+        {
+        sprintf(pip + strlen(pip), " \
+                ! queue %s ! rtp%spay name=pay0 pt=96 )",
+                perf, outMediaType);
+        }
+        else
+        {
+        sprintf(pip + strlen(pip), " \
+                ! queue ! mux. \
+                alsasrc device=hw:2,1 ! queue ! audio/x-raw,format=S24_32LE,rate=48000,channnels=2  \
+                ! audioconvert ! faac ! mux. \
+                mpegtsmux name=mux \
+                ! rtpmp2tpay name=pay0 pt=33 )"
+               );
         }
 
         gst_rtsp_media_factory_set_launch (factory, pip);
