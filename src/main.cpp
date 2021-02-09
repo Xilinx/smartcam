@@ -153,6 +153,13 @@ static std::vector<std::string> GetMonitorResolution(std::string& all)
 
 static int CheckMIPISrc()
 {
+    std::ostringstream dev;
+    dev << "/dev/media" << mipi;
+    if ( access( dev.str().c_str(), F_OK ) != 0 )
+    {
+        g_printerr("ERROR: Device %s is not ready.\n", dev.str().c_str());
+        return 1;
+    }
     if( !(w == 1920 && h == 1080 ) && !(w == 3840 && h == 2160) )
     {
         g_printerr("ERROR: MIPI src resolution can only be:\n  1) 1920x1080@30\n  2) 3840x2160@30\n");
@@ -180,6 +187,15 @@ static std::vector<std::string> GetUSBRes(std::string& all)
 
 static int CheckUSBSrc()
 {
+    std::ostringstream dev;
+    dev << "/dev/video" << usb;
+    if ( access( dev.str().c_str(), F_OK ) != 0 )
+    {
+        g_printerr("ERROR: Device %s is not ready.\n", dev.str().c_str());
+        return 1;
+    }
+
+
     std::string allres;
     std::vector<std::string> resV = GetUSBRes(allres);
     std::ostringstream inputRes;
