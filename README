@@ -196,4 +196,4 @@ how to run the application, and an overview of the application file structure.
                                         AA1.ipynb
                                                              Jupyter notebook file for MIPI->RTSP demo.
 
-    Example video files: => /usr/share/somapp/movies/AA1
+    Example video files: => /opt/xilinx/share/video/AA1/
