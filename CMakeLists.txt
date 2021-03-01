@@ -25,6 +25,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++14")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(GStreamer REQUIRED)
+find_package(OpenCV REQUIRED)
 
 SET(INSTALL_PATH "opt/xilinx")
 
@@ -33,6 +34,14 @@ target_include_directories(ivas_xpp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(ivas_xpp
   jansson ivasutil gstivasinfermeta-1.0)
 install(TARGETS ivas_xpp DESTINATION ${INSTALL_PATH}/lib)
+
+add_library(ivas_airender SHARED src/ivas_airender.cpp)
+target_include_directories(ivas_airender PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(ivas_airender 
+    jansson ivasutil gstivasinfermeta-1.0 
+    gstreamer-1.0 gstbase-1.0 glib-2.0
+    opencv_core opencv_video opencv_videoio opencv_imgproc)
+install(TARGETS ivas_airender DESTINATION ${INSTALL_PATH}/lib)
 
 
 add_executable(${CMAKE_PROJECT_NAME} src/main.cpp)

@@ -46,6 +46,7 @@ static gint h = 1080;
 static gboolean nodet = FALSE;
 static gboolean audio = FALSE;
 static gboolean reportFps = FALSE;
+static gboolean screenfps = FALSE;
 static gboolean roiOff = FALSE;
 static GOptionEntry entries[] =
 {
@@ -66,6 +67,7 @@ static GOptionEntry entries[] =
     { "nodet", 'n', 0, G_OPTION_ARG_NONE, &nodet, "no AI inference", NULL },
     { "audio", 'A', 0, G_OPTION_ARG_NONE, &audio, "RTSP with I2S audio", NULL },
     { "report", 'R', 0, G_OPTION_ARG_NONE, &reportFps, "report fps", NULL },
+    { "screenfps", 's', 0, G_OPTION_ARG_NONE, &screenfps, "display fps on screen, notice this will cause performance degradation", NULL },
     { "ROI-off", 0, 0, G_OPTION_ARG_NONE, &roiOff, "turn off ROI", NULL },
     { NULL }
 };
@@ -482,6 +484,10 @@ main (int argc, char *argv[])
     if (reportFps)
     {
         perf = (char*)"! perf ";
+    }
+    if (screenfps)
+    {
+        setenv("SMARTCAM_SCREENFPS", "1", 1);
     }
 
     if (std::string(target) == "rtsp")
