@@ -183,6 +183,7 @@ static int CheckMIPISrc()
     if (mipidev == "")
     {
         g_printerr("ERROR: MIPI device is not ready.\n", mipidev.c_str());
+        return 1;
     }
     if ( access( mipidev.c_str(), F_OK ) != 0 )
     {
@@ -409,6 +410,12 @@ main (int argc, char *argv[])
       return 1;
     }
 
+    if (!(filename && nodet && std::string(target) =="rtsp" && std::string(infileType) == std::string(outMediaType)) && access("/dev/allegroDecodeIP", F_OK) != 0)
+    {
+        g_printerr("ERROR: VCU decoder is not ready.\n");
+        return 1;
+    }
+
     if ( CheckCoexistSrc() != 0 )
     {
         return 1;
@@ -416,6 +423,12 @@ main (int argc, char *argv[])
 
     if (std::string(target) == "dp")
     {
+        if (access( "/dev/dri/by-path/platform-fd4a0000.zynqmp-display-card", F_OK ) != 0 )
+        {
+          g_printerr ("Error: zynqmp-display device is not ready.\n", filename);
+          return 1;
+        }
+
         std::string allres;
         std::vector<std::string> resV = GetMonitorResolution(allres);
         std::ostringstream inputRes;
@@ -433,6 +446,14 @@ main (int argc, char *argv[])
         if (!match)
         {
             g_printerr ("Error: Monitor doesn't support resolution %s\nAll supported resolution:\n%s\n", inputRes.str().c_str(), allres.c_str());
+            return 1;
+        }
+    }
+    else if (std::string(target) == "rtsp")
+    {
+        if ( !(filename && nodet && std::string(infileType) == std::string(outMediaType)) && access( "/dev/allegroIP", F_OK ) != 0 )
+        {
+            g_printerr("ERROR: VCU encoder is not ready.\n");
             return 1;
         }
     }
