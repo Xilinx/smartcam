@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <glob.h>
 #include <stdio.h>
 #include <gst/gst.h>
 #include <gst/rtsp-server/rtsp-server.h>
@@ -35,8 +35,10 @@ static gchar* outMediaType = (gchar*)"h264";
 static gchar* target = (gchar*)"dp";
 static gchar* aitask = (gchar*)"facedetect";
 static gint   fr = 30;
-static gint mipi = -1;
-static gint usb = -1;
+static gboolean mipi = FALSE;
+static std::string mipidev("");
+static gint usb = -2;
+static std::string usbvideo("");
 static gint w = 1920;
 static gint h = 1080;
 static gboolean nodet = FALSE;
@@ -45,8 +47,8 @@ static gboolean reportFps = FALSE;
 static gboolean roiOff = FALSE;
 static GOptionEntry entries[] =
 {
-    { "mipi", 'm', 0, G_OPTION_ARG_INT, &mipi, "mipi media id, e.g. 1 for /dev/media1", "media_ID"},
-    { "usb", 'u', 0, G_OPTION_ARG_INT, &usb, "usb camera video device id, e.g. 2 for /dev/video2", "video_ID"},
+    { "mipi", 'm', 0, G_OPTION_ARG_NONE, &mipi, "use MIPI camera as input source, auto detect, fail if no mipi connected", ""},
+    { "usb", 'u', 0, G_OPTION_ARG_INT, &usb, "usb camera media device id, e.g. 0 for /dev/media0", "media ID"},
     { "file", 'f', 0, G_OPTION_ARG_FILENAME, &filename, "location of h26x file as input", "file path"},
     { "infile-type", 'i', 0, G_OPTION_ARG_STRING, &infileType, "input file type: [h264 | h265]", "h264"},
     { "width", 'W', 0, G_OPTION_ARG_INT, &w, "resolution w of the input", "1920"},
@@ -135,6 +137,30 @@ static std::vector<std::string> GetIp()
     return rarray;
 }
 
+
+static std::string FindMIPIDev()
+{
+    glob_t globbuf;
+
+    std::string dev("");
+    glob("/dev/media*", 0, NULL, &globbuf);
+    for (int i = 0; i < globbuf.gl_pathc; i++)
+    {
+        std::ostringstream cmd;
+        cmd << "media-ctl -d " << globbuf.gl_pathv[i] << " -p | grep driver | grep xilinx-video | wc -l";
+
+        std::string a = exec(cmd.str().c_str());
+        a=a.substr(0, a.find("\n"));
+        if ( a == std::string("1") )
+        {
+            dev = globbuf.gl_pathv[i];
+            break;
+        }
+    }
+    globfree(&globbuf);
+    return dev;
+}
+
 static std::vector<std::string> GetMonitorResolution(std::string& all)
 {
     all = exec("modetest -M xlnx -c| awk '/name refresh/ {f=1;next}  /props:/{f=0;} f{print $1 \"@\" $2} '");
@@ -153,11 +179,14 @@ static std::vector<std::string> GetMonitorResolution(std::string& all)
 
 static int CheckMIPISrc()
 {
-    std::ostringstream dev;
-    dev << "/dev/media" << mipi;
-    if ( access( dev.str().c_str(), F_OK ) != 0 )
+    mipidev = FindMIPIDev();
+    if (mipidev == "")
     {
-        g_printerr("ERROR: Device %s is not ready.\n", dev.str().c_str());
+        g_printerr("ERROR: MIPI device is not ready.\n", mipidev.c_str());
+    }
+    if ( access( mipidev.c_str(), F_OK ) != 0 )
+    {
+        g_printerr("ERROR: Device %s is not ready.\n", mipidev.c_str());
         return 1;
     }
     if( !(w == 1920 && h == 1080 ) && !(w == 3840 && h == 2160) )
@@ -168,10 +197,10 @@ static int CheckMIPISrc()
     return 0;
 }
 
-static std::vector<std::string> GetUSBRes(std::string& all)
+static std::vector<std::string> GetUSBRes(std::string video, std::string& all)
 {
     std::ostringstream cmd;
-    cmd << "v4l2-ctl --list-formats-ext -d /dev/video" << usb << " | awk '/\\s*\\[/ {f=1;}  /MJPG/ {f=0;} /\\s*\\[/ {next} f && /Size/{print s; s=\"\"; print $3;} END{print s} f && /Interval:/{s=s $4 $5}' | awk 'NF'  | sed 's/\\((\\|)(\\|)\\)/ /g' ";
+    cmd << "v4l2-ctl --list-formats-ext -d " << video << " | awk '/\\s*\\[/ {f=1;}  /MJPG/ {f=0;} /\\s*\\[/ {next} f && /Size/{print s; s=\"\"; print $3;} END{print s} f && /Interval:/{s=s $4 $5}' | awk 'NF'  | sed 's/\\((\\|)(\\|)\\)/ /g' ";
     all = exec(cmd.str().c_str());
     std::string s = all;
     std::vector<std::string> rarray;
@@ -185,19 +214,92 @@ static std::vector<std::string> GetUSBRes(std::string& all)
     return rarray;
 }
 
+
+static std::string GetUSBVideoDevFromMedia(std::string media)
+{
+    std::ostringstream cmd;
+    cmd << "media-ctl -d " << media << " -p | awk '/^driver\\s*uvcvideo/ {u=1} /device node name *\\/dev\\/video/ {x=$4;f=1;next} u&&f&&/pad0: Sink/ {print x; x=\"\"} f {f=0} '";
+
+    std::string s = exec(cmd.str().c_str());
+
+    std::vector<std::string> rarray;
+    std::size_t pos;
+    while ((pos = s.find("\n")) != std::string::npos) {
+        std::string token = s.substr(0, pos);
+        rarray.push_back(token);
+        s.erase(0, pos + std::string("\n").length());
+    }
+    if (rarray.size() == 1)
+        return rarray[0];
+    else
+        return "";
+}
+
+static std::string FindUSBDev()
+{
+    glob_t globbuf;
+
+    std::string video("");
+    std::string medialist("");
+    int num = 0;
+    glob("/dev/media*", 0, NULL, &globbuf);
+    for (int i = 0; i < globbuf.gl_pathc; i++)
+    {
+        std::string tmp = GetUSBVideoDevFromMedia(globbuf.gl_pathv[i]);
+        if (tmp != "")
+        {
+            video = tmp;
+            medialist += "\n";
+            medialist += globbuf.gl_pathv[i];
+            num++;
+        }
+    }
+    if (num > 1)
+    {
+        g_printerr("ERROR: More than 1 USB cam, please choose one: %s\n", medialist.c_str());
+        video = "";
+    }
+    else if (num == 0)
+    {
+        g_printerr("ERROR: No USB camera found.\n");
+    }
+    else
+    {
+        g_print("INFO: 1 USB camera found: %s\n", medialist.c_str() );
+    }
+    return video;
+}
+
 static int CheckUSBSrc()
 {
-    std::ostringstream dev;
-    dev << "/dev/video" << usb;
-    if ( access( dev.str().c_str(), F_OK ) != 0 )
+    if (usb < 0)
     {
-        g_printerr("ERROR: Device %s is not ready.\n", dev.str().c_str());
-        return 1;
+        usbvideo = FindUSBDev();
+        if (usbvideo == "")
+        {
+            return 1;
+        }
+    }
+    else
+    {
+        std::ostringstream media;
+        media << "/dev/media" << usb;
+        if ( access( media.str().c_str(), F_OK ) != 0 )
+        {
+            g_printerr("ERROR: Device %s is not ready.\n", media.str().c_str());
+            return 1;
+        }
+
+        usbvideo = GetUSBVideoDevFromMedia(media.str());
+        if (usbvideo == "") {
+            g_printerr("ERROR: Device %s is not USB cam.\n", media.str().c_str());
+            return 1;
+        }
     }
 
-
+    
     std::string allres;
-    std::vector<std::string> resV = GetUSBRes(allres);
+    std::vector<std::string> resV = GetUSBRes(usbvideo, allres);
     std::ostringstream inputRes;
     inputRes << w << "x" << h;
     bool match = false;
@@ -227,7 +329,7 @@ static int CheckCoexistSrc()
         given = "File is given by -f, ";
     }
 
-    if ( mipi > -1 )
+    if ( mipi )
     {
         if (given.size() > 0) 
         {
@@ -239,7 +341,8 @@ static int CheckCoexistSrc()
             checkMipi = true;
         }
     }
-    if ( usb > -1 )
+
+    if ( usb > -2 )
     {
         if (given.size() > 0) 
         {
@@ -358,14 +461,14 @@ main (int argc, char *argv[])
                     "%s location=%s ! %sparse ! queue ! omx%sdec ! video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", 
                     (std::string(target) == "file") ? "filesrc" : "multifilesrc",
                     filename, infileType, infileType, w, h, fr);
-        } else if (mipi > -1) {
+        } else if (mipidev != "") {
             sprintf(pip + strlen(pip), 
-                    "mediasrcbin name=videosrc media-device=/dev/media%d %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", mipi, (w==1920 && h==1080 && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf v4l2src0::stride-align=256" : ""), w, h, fr);
-        } else if (usb > -1) {
+                    "mediasrcbin name=videosrc media-device=%s %s !  video/x-raw, width=%d, height=%d, format=NV12, framerate=%d/1 ", mipidev.c_str(), (w==1920 && h==1080 && std::string(target) == "dp" ? " v4l2src0::io-mode=dmabuf v4l2src0::stride-align=256" : ""), w, h, fr);
+        } else if (usbvideo != "") {
             sprintf(pip + strlen(pip), 
-                    "v4l2src name=videosrc device=/dev/video%d io-mode=mmap %s !  video/x-raw, width=%d, height=%d ! videoconvert \
+                    "v4l2src name=videosrc device=%s io-mode=mmap %s !  video/x-raw, width=%d, height=%d ! videoconvert \
                     ! video/x-raw, format=NV12",
-                    usb, (w==1920 && h==1080 && std::string(target) == "dp" ? "stride-align=256" : ""), w, h );
+                    usbvideo.c_str(), (w==1920 && h==1080 && std::string(target) == "dp" ? "stride-align=256" : ""), w, h );
         }
 
         if (!nodet) {

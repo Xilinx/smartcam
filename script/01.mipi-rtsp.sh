@@ -15,7 +15,6 @@
 #
 w=${1:-"1920"} h=${2:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source ${DIR}/setupmipi.sh
 
-${DIR}/smartcam_aa1 --mipi ${media} -t rtsp --width ${w} --height ${h} 
+${DIR}/smartcam_aa1 --mipi -t rtsp --width ${w} --height ${h} 
 

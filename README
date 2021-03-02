@@ -127,8 +127,8 @@ how to run the application, and an overview of the application file structure.
       --help-gst                        Show GStreamer Options
 
     Application Options:
-      -m, --mipi=media_ID               mipi media id, e.g. 1 for /dev/media1
-      -u, --usb=video_ID                usb camera video device id, e.g. 2 for /dev/video2
+      -m, --mipi                        auto detect MIPI device
+      -u, --usb=media_ID                usb camera media device id, e.g. 0 for /dev/media0
       -f, --file=file path              location of h26x file as input
       -i, --infile-type=h264            input file type: [h264 | h265]
       -W, --width=1920                  resolution w of the input
@@ -149,11 +149,11 @@ how to run the application, and an overview of the application file structure.
    have limitations:
    A) input MIPI (IAS sensor input):
       output: RTSP
-        smartcam_aa1  --mipi 0 -W 1920 -H 1080 --target rtsp >/dev/null 2>&1
+        smartcam_aa1  --mipi -W 1920 -H 1080 --target rtsp >/dev/null 2>&1
       output: DP
-        smartcam_aa1  --mipi 0 -W 1920 -H 1080 --target dp >/dev/null 2>&1
+        smartcam_aa1  --mipi -W 1920 -H 1080 --target dp >/dev/null 2>&1
       output: file
-        smartcam_aa1  --mipi 0 -W 1920 -H 1080 --target file >/dev/null 2>&1
+        smartcam_aa1  --mipi -W 1920 -H 1080 --target file >/dev/null 2>&1
 
    B) input file (file on file system):
       output: RTSP [!Not functional in EA1]
