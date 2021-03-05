@@ -71,10 +71,6 @@ install(DIRECTORY
     notebook/
     DESTINATION usr/share/notebooks/smartcam_aa1/)
 
-install(DIRECTORY
-    video/
-    DESTINATION ${INSTALL_PATH}/share/video/AA1)
-
 set(VERSION "1.0.1")
 set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_GENERATOR "RPM")
