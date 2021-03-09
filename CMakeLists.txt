@@ -60,16 +60,16 @@ install(DIRECTORY
     config/facedetect
     config/refinedet
     config/ssd
-    DESTINATION ${INSTALL_PATH}/share/smartcam_aa1/)
+    DESTINATION ${INSTALL_PATH}/share/ivas/smartcam_aa1/)
 
 install(FILES
     config/ssd/label.json
-    DESTINATION usr/share/vitis_ai_library/models/ssd_adas_pruned_0_95/
+    DESTINATION ${INSTALL_PATH}/share/vitis_ai_library/models/ssd_adas_pruned_0_95/
     )
 
 install(DIRECTORY
     notebook/
-    DESTINATION usr/share/notebooks/smartcam_aa1/)
+    DESTINATION ${INSTALL_PATH}/share/notebooks/smartcam_aa1/)
 
 set(VERSION "1.0.1")
 set(CPACK_PACKAGE_VERSION ${VERSION})

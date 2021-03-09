@@ -8,7 +8,7 @@
       "config": {
 	"model-name" : "densebox_640_360",
 	"model-class" : "FACEDETECT",
-	"model-path" : "/usr/share/vitis_ai_library/models/",
+	"model-path" : "/opt/xilinx/share/vitis_ai_library/models/",
 	"run_time_model" : false,
 	"need_preprocess" : false,
 	"performance_test" : false,

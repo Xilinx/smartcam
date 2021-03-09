@@ -230,7 +230,7 @@ static std::string GetUSBVideoDevFromMedia(std::string media)
         rarray.push_back(token);
         s.erase(0, pos + std::string("\n").length());
     }
-    if (rarray.size() == 1)
+    if (rarray.size() > 0)
         return rarray[0];
     else
         return "";
@@ -461,7 +461,7 @@ main (int argc, char *argv[])
 
     loop = g_main_loop_new (NULL, FALSE);
 
-    std::string confdir("/opt/xilinx/share/smartcam_aa1/");
+    std::string confdir("/opt/xilinx/share/ivas/smartcam_aa1/");
     confdir += (aitask);
     char pip[2500];
     pip[0] = '\0';
