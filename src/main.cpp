@@ -533,23 +533,34 @@ main (int argc, char *argv[])
                 );
         }
 
-        if (!audio)
+        std::string audioId = "";
+        if (audio)
+        {
+            audioId = exec("arecord -l|grep xlnx-i2s-snd-card | awk '{print $2}' | sed 's/://'");
+            std::size_t pos = audioId.find("\n");
+            if (pos != std::string::npos) {
+                audioId = audioId.substr(0,pos);
+            } else {
+                audioId = "";
+            }
+        }
+
+        if (audio && audioId != "")
+        {
+        sprintf(pip + strlen(pip), " \
+                ! queue ! mux. \
+                alsasrc device=hw:%s,1 ! queue ! audio/x-raw,format=S24_32LE,rate=48000,channnels=2  \
+                ! audioconvert ! faac ! mux. \
+                mpegtsmux name=mux \
+                ! rtpmp2tpay name=pay0 pt=33 )", audioId.c_str()
+               );
+        }
+        else
         {
         sprintf(pip + strlen(pip), " \
                 ! queue %s ! rtp%spay name=pay0 pt=96 )",
                 perf, outMediaType);
         }
-        else
-        {
-        sprintf(pip + strlen(pip), " \
-                ! queue ! mux. \
-                alsasrc device=hw:2,1 ! queue ! audio/x-raw,format=S24_32LE,rate=48000,channnels=2  \
-                ! audioconvert ! faac ! mux. \
-                mpegtsmux name=mux \
-                ! rtpmp2tpay name=pay0 pt=33 )"
-               );
-        }
-
         gst_rtsp_media_factory_set_launch (factory, pip);
         gst_rtsp_media_factory_set_shared (factory, TRUE);
         gst_rtsp_mount_points_add_factory (mounts, "/test", factory);
