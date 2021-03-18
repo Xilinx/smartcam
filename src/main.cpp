@@ -374,6 +374,10 @@ static int CheckCoexistSrc()
 int
 main (int argc, char *argv[])
 {
+    char* pathVar = std::getenv("PATH");
+    std::string setPath = std::string("PATH=") + std::string(pathVar) + ":/usr/sbin:/sbin";
+    putenv((char*)setPath.c_str());
+
     GMainLoop *loop;
     GstRTSPServer *server;
     GstRTSPMountPoints *mounts;
