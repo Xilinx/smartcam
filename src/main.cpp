@@ -465,7 +465,7 @@ main (int argc, char *argv[])
 
     loop = g_main_loop_new (NULL, FALSE);
 
-    std::string confdir("/opt/xilinx/share/ivas/smartcam_aa1/");
+    std::string confdir("/opt/xilinx/share/ivas/smartcam/");
     confdir += (aitask);
     char pip[2500];
     pip[0] = '\0';

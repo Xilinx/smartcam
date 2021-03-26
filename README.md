@@ -8,7 +8,7 @@ If you want to build from source, follow these steps, otherwise skip this sectio
 
 
 The following file outlines the file structure and instructions on how to use
-the AA1 application. This file outlines the HW requirements for the application, how to run the application, and an overview of the application file structure. 
+the smartcam application. This file outlines the HW requirements for the application, how to run the application, and an overview of the application file structure. 
 
 # How to run the example application:
 
@@ -89,7 +89,7 @@ You may experience a lag of <1s, which maybe bigger / smaller if you use other R
        
   * Command line scripts and configurations.
   
-    These allow for the user to define different video input and output device targets using the "smartcam_aa1" application. These are to be executed using the UART/debug interface. Example scripts and configuration definitions are provided below.
+    These allow for the user to define different video input and output device targets using the "smartcam" application. These are to be executed using the UART/debug interface. Example scripts and configuration definitions are provided below.
 
 * Example scripts are provided on the system. For location see "File Structure"
 
@@ -138,13 +138,13 @@ You may experience a lag of <1s, which maybe bigger / smaller if you use other R
 
           You should be able to see a video of highway driving, with detection of vehicles in a bounding box.   
 
-# Additional configuration options for smartcam_aa1 invocation:
-   The example scripts and Jupyter notebook work as examples to show capability of the smartcam_aa1 for specific configurations.
-   More combinations could be made based on the options provided by smartcam_aa1.
-   You can get detailed application options as following by invoking ./smartcam_aa1 --help.
+# Additional configuration options for smartcam invocation:
+   The example scripts and Jupyter notebook work as examples to show capability of the smartcam for specific configurations.
+   More combinations could be made based on the options provided by smartcam.
+   You can get detailed application options as following by invoking ./smartcam --help.
 
     Usage:
-      smartcam_aa1 [OPTION?] - Application for face detection on SOM board of Xilinx.
+      smartcam [OPTION?] - Application for face detection on SOM board of Xilinx.
     
     Help Options:
       -h, --help                        Show help options
@@ -168,7 +168,7 @@ You may experience a lag of <1s, which maybe bigger / smaller if you use other R
       --ROI-off                         turn off ROI
 
 
-   Example of supported combinations sorted by input are outlined below. If using command line to invoke the smartcam_aa1 stop the process via CTLR-C prior to starting the next instance.
+   Example of supported combinations sorted by input are outlined below. If using command line to invoke the smartcam stop the process via CTLR-C prior to starting the next instance.
 
    Note some of the configurations have functional limitations in EA1.
    have limitations.
@@ -176,26 +176,26 @@ You may experience a lag of <1s, which maybe bigger / smaller if you use other R
    * input MIPI (IAS sensor input):
       * output: RTSP
 
-        `smartcam_aa1  --mipi -W 1920 -H 1080 --target rtsp >/dev/null 2>&1`
+        `smartcam  --mipi -W 1920 -H 1080 --target rtsp >/dev/null 2>&1`
 
       * output: DP
 
-        `smartcam_aa1  --mipi -W 1920 -H 1080 --target dp >/dev/null 2>&1`
+        `smartcam  --mipi -W 1920 -H 1080 --target dp >/dev/null 2>&1`
 
       * output: file
 
-        `smartcam_aa1  --mipi -W 1920 -H 1080 --target file >/dev/null 2>&1`
+        `smartcam  --mipi -W 1920 -H 1080 --target file >/dev/null 2>&1`
 
    * input file (file on file system):
       * output: RTSP [!Not functional in EA1]
 
-        `smartcam_aa1  --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target rtsp >/dev/null 2>&1 `
+        `smartcam  --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target rtsp >/dev/null 2>&1 `
       * output: DP [!Not functional in EA1]
 
-        `smartcam_aa1  --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target dp >/dev/null 2>&1`
+        `smartcam  --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target dp >/dev/null 2>&1`
       * output: file
 
-        `smartcam_aa1  --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target file >/dev/null 2>&1`
+        `smartcam  --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target file >/dev/null 2>&1`
 
       **Note** you must update the command to the specific file desired as input source.
 
@@ -203,15 +203,15 @@ You may experience a lag of <1s, which maybe bigger / smaller if you use other R
 
       * output: RTSP
 
-        `smartcam_aa1  --usb 1 -W 1920 -H 1080 -r 30 --target rtsp >/dev/null 2>&1`
+        `smartcam  --usb 1 -W 1920 -H 1080 -r 30 --target rtsp >/dev/null 2>&1`
 
       * output: DP
 
-        `smartcam_aa1  --usb 1 -W 1920 -H 1080 -r 30 --target dp >/dev/null 2>&1`
+        `smartcam  --usb 1 -W 1920 -H 1080 -r 30 --target dp >/dev/null 2>&1`
 
       * output: file
 
-        `smartcam_aa1  --usb 1 -W 1920 -H 1080 -r 30 --target file >/dev/null 2>&1`
+        `smartcam  --usb 1 -W 1920 -H 1080 -r 30 --target file >/dev/null 2>&1`
       
       **You must ensure the width/height/framerate defined are supported by your USB camera.**
 
@@ -222,16 +222,16 @@ The application is installed as:
 
 * Binary File: => /opt/xilinx/bin
 
-  smartcam_aa1         main app
+  smartcam         main app
 
 * Script File: => /opt/xilinx/bin/
 
   |||
   |-|-|
-  |setupmipi.sh     |    find mipi media number, to be used by smartcam_aa1.
-  |01.mipi-rtsp.sh  |    call smartcam_aa1 to run facedetction and send out rtsp stream.
-  |02.mipi-dp.sh    |    call smartcam_aa1 to run facedetction and display on DP display.
-  |03.file-file.sh  |    call smartcam_aa1 to run facedetction and display on input h264/5 file and generate output h264/5 with detection boxes.
+  |setupmipi.sh     |    find mipi media number, to be used by smartcam.
+  |01.mipi-rtsp.sh  |    call smartcam to run facedetction and send out rtsp stream.
+  |02.mipi-dp.sh    |    call smartcam to run facedetction and display on DP display.
+  |03.file-file.sh  |    call smartcam to run facedetction and display on input h264/5 file and generate output h264/5 with detection boxes.
 
 * configuration File: => /opt/xilinx/share/ivas
 
@@ -241,12 +241,10 @@ The application is installed as:
   |  kernel_densebox_640_360.json|
   |  kernel_xpp_pipeline.json|
 
-* Jupyter notebook file:  => /usr/share/notebooks/smartcam_aa1
+* Jupyter notebook file:  => /usr/share/notebooks/smartcam
 
   |||
   |-|-|
-  |AA1.ipynb    |        Jupyter notebook file for MIPI->RTSP demo. |
-
-* Example video files: => /usr/share/somapp/movies/AA1
+  |smartcam.ipynb    |        Jupyter notebook file for MIPI->RTSP demo. |
 
 <p align="center"><sup>Copyright&copy; 2021 Xilinx</sup></p>

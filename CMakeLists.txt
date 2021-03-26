@@ -16,7 +16,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project(smartcam_aa1)
+project(smartcam)
 
 SET(CMAKE_INSTALL_PREFIX $ENV{OECORE_TARGET_SYSROOT})
 
@@ -35,12 +35,12 @@ target_link_libraries(ivas_xpp
 install(TARGETS ivas_xpp DESTINATION ${INSTALL_PATH}/lib)
 
 
-add_executable(smartcam_aa1 src/main.cpp)
-target_include_directories(smartcam_aa1 PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(smartcam_aa1
+add_executable(${CMAKE_PROJECT_NAME} src/main.cpp)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(${CMAKE_PROJECT_NAME}
   gstapp-1.0 gstreamer-1.0 gstbase-1.0 gobject-2.0 glib-2.0 gstvideo-1.0 gstallocators-1.0 gstrtsp-1.0 gstrtspserver-1.0
   glib-2.0 gobject-2.0 )
-install(TARGETS smartcam_aa1 DESTINATION ${INSTALL_PATH}/bin)
+install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_PATH}/bin)
 
 
 install(PROGRAMS
@@ -60,21 +60,21 @@ install(DIRECTORY
     config/facedetect
     config/refinedet
     config/ssd
-    DESTINATION ${INSTALL_PATH}/share/ivas/smartcam_aa1/)
+    DESTINATION ${INSTALL_PATH}/share/ivas/${CMAKE_PROJECT_NAME}/)
 
 install(FILES
     config/ssd/label.json
-    DESTINATION ${INSTALL_PATH}/share/vitis_ai_library/models/ssd_adas_pruned_0_95/
+    DESTINATION ${INSTALL_PATH}/share/vitis_ai_library/models/kv260-${CMAKE_PROJECT_NAME}/ssd_adas_pruned_0_95/
     )
 
 install(DIRECTORY
     notebook/
-    DESTINATION ${INSTALL_PATH}/share/notebooks/smartcam_aa1/)
+    DESTINATION ${INSTALL_PATH}/share/notebooks/${CMAKE_PROJECT_NAME}/)
 
 set(VERSION "1.0.1")
 set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_GENERATOR "RPM")
-set(CPACK_PACKAGE_NAME "SmartCam_aa1")
+set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_RELEASE 1)
 set(CPACK_PACKAGE_CONTACT "Yuxiz@xilinx.com")
 set(CPACK_PACKAGE_VENDOR "xilinx")

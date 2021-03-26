@@ -1,5 +1,5 @@
 {
-  "xclbin-location":"/usr/lib/dpu.xclbin",
+  "xclbin-location":"/lib/firmware/xilinx/kv260-smartcam/kv260-smartcam.xclbin",
   "ivas-library-repo": "/usr/lib/",
   "element-mode":"inplace",
   "kernels" :[
@@ -8,7 +8,7 @@
       "config": {
 	"model-name" : "refinedet_pruned_0_96",
 	"model-class" : "REFINEDET",
-	"model-path" : "/opt/xilinx/share/vitis_ai_library/models/",
+	"model-path" : "/opt/xilinx/share/vitis_ai_library/models/kv260-smartcam",
 	"run_time_model" : false,
 	"need_preprocess" : false,
 	"performance_test" : false,

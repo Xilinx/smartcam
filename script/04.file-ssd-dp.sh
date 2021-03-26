@@ -22,5 +22,5 @@ file=${1}
 w=${1:-"1920"} h=${2:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-${DIR}/smartcam_aa1 --file ${file} --target dp  --width ${w} --height ${h} -r 30 --aitask ssd 
+${DIR}/smartcam --file ${file} --target dp  --width ${w} --height ${h} -r 30 --aitask ssd 
 

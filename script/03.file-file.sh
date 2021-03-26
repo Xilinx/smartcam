@@ -21,4 +21,4 @@ file=${1}
 w=${2:-"1920"} h=${3:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-${DIR}/smartcam_aa1 --file ${file} --infile-type h264 --target file  --width ${w} --height ${h}
+${DIR}/smartcam --file ${file} --infile-type h264 --target file  --width ${w} --height ${h}
