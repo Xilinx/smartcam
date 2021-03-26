@@ -14,7 +14,11 @@
 # limitations under the License.
 #
 
-file=${1:-"/usr/share/somapp/movies/AA1/Road-Adas.nv12.30fps.1080p.h264"}
+if [$# -le 1];
+    echo "Please give a path to the video file"
+    exit 1
+fi
+file=${1}
 w=${1:-"1920"} h=${2:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
