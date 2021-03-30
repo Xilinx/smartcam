@@ -23,6 +23,8 @@
 #include <sstream>
 #include <memory>
 #include <stdexcept>
+#include <unistd.h>
+#include <sys/types.h>
 
 #define DEFAULT_RTSP_PORT "5000"
 
@@ -402,7 +404,13 @@ main (int argc, char *argv[])
     }
     g_option_context_free (optctx);
 
-    if (!filename && mipi == -1 && usb == -1)
+    if (getuid() != 0) 
+    {
+      g_printerr ("Please run with sudo.\n");
+      return 1;
+    }
+
+    if (!filename && !mipi && usb == -1)
     {
       g_printerr ("Error: No input is given by -m / -u / -f .\n");
       return 1;
