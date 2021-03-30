@@ -1,10 +1,13 @@
 
 # Development Guide:
-If you want to build from source, follow these steps, otherwise skip this section.
 
-   1. Install the SoM `sdk.sh` to the path you choose or default. Suppose SDKPATH.
-   2. Run "./build.sh ${SDKPATH}" to build the somapp application.
-   3. The build process in 2. will produce a rpm package smartcam-1.0.1-1.aarch64.rpm under build/, upload to the board, and run "rmp -ivh --force ./smartcam-1.0.1-1.aarch64.rpm" to update install.
+If you want to cross compile the source in Linux PC machine, follow these steps, otherwise skip this section.
+
+1. Refer to the `K260 SOM Starter Kit Tutorial` to build the cross-compilation SDK, and install it to the path you choose or default. Suppose it's SDKPATH.
+
+2. Run "./build.sh ${SDKPATH}" in the source code folder of current application, to build the application. <a name="build-app"></a>
+
+3. The build process in [2](#build-app). will produce a rpm package smartcam-1.0.1-1.aarch64.rpm under build/, upload to the board, and run "rmp -ivh --force ./smartcam-1.0.1-1.aarch64.rpm" to update install.
 
 
 # Setting up the Board
