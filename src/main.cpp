@@ -30,6 +30,7 @@
 
 
 static char *port = (char *) DEFAULT_RTSP_PORT;
+static char *msgFirmware = (char *)"Please make sure that the HW accelerator firmware is loaded via xmutil loadapp kv260-smartcam.\n";
 
 static gchar* filename = NULL;
 static gchar* infileType = (gchar*)"h264";
@@ -186,12 +187,12 @@ static int CheckMIPISrc()
     mipidev = FindMIPIDev();
     if (mipidev == "")
     {
-        g_printerr("ERROR: MIPI device is not ready.\n", mipidev.c_str());
+        g_printerr("ERROR: MIPI device is not ready.\n%s", msgFirmware);
         return 1;
     }
     if ( access( mipidev.c_str(), F_OK ) != 0 )
     {
-        g_printerr("ERROR: Device %s is not ready.\n", mipidev.c_str());
+        g_printerr("ERROR: Device %s is not ready.\n%s", mipidev.c_str(), msgFirmware);
         return 1;
     }
     if( !(w == 1920 && h == 1080 ) && !(w == 3840 && h == 2160) )
@@ -426,7 +427,7 @@ main (int argc, char *argv[])
 
     if (!(filename && nodet && std::string(target) =="rtsp" && std::string(infileType) == std::string(outMediaType)) && access("/dev/allegroDecodeIP", F_OK) != 0)
     {
-        g_printerr("ERROR: VCU decoder is not ready.\n");
+        g_printerr("ERROR: VCU decoder is not ready.\n%s", msgFirmware);
         return 1;
     }
 
@@ -439,7 +440,7 @@ main (int argc, char *argv[])
     {
         if (access( "/dev/dri/by-path/platform-fd4a0000.zynqmp-display-card", F_OK ) != 0 )
         {
-          g_printerr ("Error: zynqmp-display device is not ready.\n", filename);
+          g_printerr ("Error: zynqmp-display device is not ready.\n%s", filename, msgFirmware);
           return 1;
         }
 
