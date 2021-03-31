@@ -413,7 +413,7 @@ main (int argc, char *argv[])
       return 1;
     }
 
-    if (!filename && !mipi && usb == -1)
+    if (!filename && !mipi && usb <= -2)
     {
       g_printerr ("Error: No input is given by -m / -u / -f .\n");
       return 1;
