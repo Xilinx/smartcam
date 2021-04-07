@@ -62,7 +62,7 @@ install(PROGRAMS
 install(FILES
     README
     DESTINATION ${INSTALL_PATH}/
-    RENAME      README_AA1
+    RENAME      README_SMARTCAM
     )
 
 install(DIRECTORY
