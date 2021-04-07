@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#define DEFAULT_RTSP_PORT "5000"
+#define DEFAULT_RTSP_PORT "554"
 
 
 static char *port = (char *) DEFAULT_RTSP_PORT;
@@ -62,7 +62,7 @@ static GOptionEntry entries[] =
     { "target", 't', 0, G_OPTION_ARG_STRING, &target, "[dp|rtsp|file]", "dp"},
     { "outmedia-type", 'o', 0, G_OPTION_ARG_STRING, &outMediaType, "output file type: [h264 | h265]", "h264"},
     { "port", 'p', 0, G_OPTION_ARG_STRING, &port,
-        "Port to listen on (default: " DEFAULT_RTSP_PORT ")", "5000"},
+        "Port to listen on (default: " DEFAULT_RTSP_PORT ")", DEFAULT_RTSP_PORT},
 
     { "aitask", 'a', 0, G_OPTION_ARG_STRING, &aitask, "select AI task to be run: [facedetect|ssd|refinedet]" },
     { "nodet", 'n', 0, G_OPTION_ARG_NONE, &nodet, "no AI inference", NULL },

@@ -234,7 +234,7 @@ The example scripts and Jupyter notebook work as examples to show the capability
 
  -o, --outmedia-type=h264   output file type: [h264 | h265]
 
- -p, --port=5000            Port to listen on (default: 5000)
+ -p, --port=554             Port to listen on (default: 554)
 
  -a, --aitask               select AI task to be run: [facedetect|ssd|refinedet]
 
