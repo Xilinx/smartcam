@@ -7,7 +7,7 @@ If you want to cross compile the source in Linux PC machine, follow these steps,
 
 2. Run "./build.sh ${SDKPATH}" in the source code folder of current application, to build the application. <a name="build-app"></a>
 
-3. The build process in [2](#build-app). will produce a rpm package smartcam-1.0.1-1.aarch64.rpm under build/, upload to the board, and run `rmp -ivh --force ./smartcam-1.0.1-1.aarch64.rpm` to update install.
+3. The build process in [2](#build-app). will produce a rpm package smartcam-1.0.1-1.aarch64.rpm under build/, upload to the board, and run `rpm -ivh --force ./smartcam-1.0.1-1.aarch64.rpm` to update install.
 
 # Setting up the Board
 
