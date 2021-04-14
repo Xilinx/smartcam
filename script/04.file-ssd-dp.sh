@@ -14,12 +14,12 @@
 # limitations under the License.
 #
 
-if [$# -le 1];
+if [ $# -lt 1 ]; then
     echo "Please give a path to the video file"
     exit 1
 fi
 file=${1}
-w=${1:-"1920"} h=${2:-"1080"}
+w=${2:-"1920"} h=${3:-"1080"}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 ${DIR}/smartcam --file ${file} --target dp  --width ${w} --height ${h} -r 30 --aitask ssd 
