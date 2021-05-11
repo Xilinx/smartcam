@@ -518,7 +518,10 @@ main (int argc, char *argv[])
                     ! ima.sink_master \
                     ivas_xmetaaffixer name=ima ima.src_master ! fakesink \
                     t. \
-                    ! queue max-size-buffers=1 leaky=2 ! ima.sink_slave_0 ima.src_slave_0 ! queue ! ivas_xfilter kernels-config=\"%s/drawresult.json\" ", confdir.c_str(), confdir.c_str(), confdir.c_str());
+                    ! queue max-size-buffers=1 leaky=%d ! ima.sink_slave_0 ima.src_slave_0 ! queue ! ivas_xfilter kernels-config=\"%s/drawresult.json\" ",
+                    confdir.c_str(),
+                    confdir.c_str(),
+                    filename? 0 : 2, confdir.c_str());
         }
     }
 
