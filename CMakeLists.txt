@@ -57,6 +57,7 @@ install(PROGRAMS
     script/02.mipi-dp.sh
     script/03.file-file.sh
     script/04.file-ssd-dp.sh
+    script/smartcam-install.py
     DESTINATION ${INSTALL_PATH}/bin)
 
 install(FILES
