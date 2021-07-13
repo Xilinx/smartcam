@@ -37,6 +37,17 @@ static gchar* infileType = (gchar*)"h264";
 static gchar* outMediaType = (gchar*)"h264";
 static gchar* target = (gchar*)"dp";
 static gchar* aitask = (gchar*)"facedetect";
+
+static gchar* controlRate = (gchar*)"low-latency";
+static gchar* targetBitrate = NULL;
+static gchar* gopLength = (gchar*)"60";
+
+static gchar* profile = NULL;
+static gchar* level = NULL;
+static gchar* tier = NULL;
+
+static gchar* encodeEnhancedParam = NULL;
+
 static gint   fr = 30;
 static gboolean mipi = FALSE;
 static std::string mipidev("");
@@ -70,6 +81,17 @@ static GOptionEntry entries[] =
     { "report", 'R', 0, G_OPTION_ARG_NONE, &reportFps, "report fps", NULL },
     { "screenfps", 's', 0, G_OPTION_ARG_NONE, &screenfps, "display fps on screen, notice this will cause performance degradation", NULL },
     { "ROI-off", 0, 0, G_OPTION_ARG_NONE, &roiOff, "turn off ROI", NULL },
+
+    { "control-rate", 0, 0, G_OPTION_ARG_STRING, &controlRate, "Encoder parameter control-rate", "low-latency" },
+    { "target-bitrate", 0, 0, G_OPTION_ARG_STRING, &targetBitrate, "Encoder parameter target-bitrate", NULL },
+    { "gop-length", 0, 0, G_OPTION_ARG_STRING, &gopLength, "Encoder parameter gop-length", "60"},
+
+    { "profile", 0, 0, G_OPTION_ARG_STRING, &profile, "Encoder parameter profile.", NULL },
+    { "level", 0, 0, G_OPTION_ARG_STRING, &level, "Encoder parameter level", NULL },
+    { "tier", 0, 0, G_OPTION_ARG_STRING, &tier, "Encoder parameter tier", NULL },
+
+    { "encodeEnhancedParam", 0, 0, G_OPTION_ARG_STRING, &encodeEnhancedParam, "String for fully customizing the encoder in the form \"param1=val1, param2=val2,...\", where paramn is the name of the encoder parameter", NULL },
+
     { NULL }
 };
 
@@ -544,14 +566,21 @@ main (int argc, char *argv[])
         {
         sprintf(pip + strlen(pip), " \
                 %s \
-                ! queue ! omx%senc qp-mode=%s  num-slices=8 gop-length=60 periodicity-idr=270 \
-                control-rate=low-latency                      gop-mode=low-delay-p gdr-mode=horizontal cpb-size=200 \
-                initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false \
-                ! video/x-%s, alignment=au \
+                ! queue ! omx%senc \
+                qp-mode=%s  \
+                control-rate=%s  %s%s gop-length=%s \
+                %s \
+                ! video/x-%s, alignment=au\
+                %s%s %s%s %s%s \
                 ",
                 roiOff ? "" : " ! queue ! ivas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
-                outMediaType, roiOff ? "auto" : "1",
-                outMediaType
+                outMediaType,
+                roiOff ? "auto" : "1",
+                controlRate, targetBitrate?"target-bitrate=":"", targetBitrate?targetBitrate:"", gopLength,
+                encodeEnhancedParam ? encodeEnhancedParam : "gop-mode=low-delay-p gdr-mode=horizontal cpb-size=200 num-slices=8 periodicity-idr=270 \
+                    initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false ",
+                outMediaType, 
+                profile ? ", profile=\\(string\\)" : "", profile ? profile : "", level ? ", level=\\(string\\)":"", level ? level : "", tier?", tier=\\(string\\)" : "", tier ? tier: ""
                 );
         }
 
@@ -583,6 +612,7 @@ main (int argc, char *argv[])
                 ! queue %s ! rtp%spay name=pay0 pt=96 )",
                 perf, outMediaType);
         }
+
         gst_rtsp_media_factory_set_launch (factory, pip);
         gst_rtsp_media_factory_set_shared (factory, TRUE);
         gst_rtsp_mount_points_add_factory (mounts, "/test", factory);
@@ -607,10 +637,25 @@ main (int argc, char *argv[])
         if (std::string(target) == "file")
         {
             sprintf(pip + strlen(pip), "\
-                ! queue ! omx%senc qp-mode=auto num-slices=8 gop-length=60 periodicity-idr=270 \
-                control-rate=low-latency                      gop-mode=low-delay-p gdr-mode=horizontal cpb-size=200 \
-                initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false %s \
-                ! filesink location=./out.%s", outMediaType, perf, outMediaType);
+                %s \
+                ! queue ! omx%senc \
+                qp-mode=%s  \
+                control-rate=%s  %s%s gop-length=%s \
+                %s \
+                ! video/x-%s, alignment=au\
+                %s%s %s%s %s%s \
+                %s \
+                ! filesink location=./out.%s",
+                roiOff ? "" : " ! queue ! ivas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
+                outMediaType,
+                roiOff ? "auto" : "1",
+                controlRate, targetBitrate?"target-bitrate=":"", targetBitrate?targetBitrate:"", gopLength,
+                encodeEnhancedParam ? encodeEnhancedParam : "gop-mode=low-delay-p gdr-mode=horizontal cpb-size=200 num-slices=8 periodicity-idr=270 \
+                    initial-delay=100  filler-data=false min-qp=15  max-qp=40  b-frames=0  low-bandwidth=false ",
+                outMediaType, 
+                profile ? ", profile=(string)" : "", profile ? profile : "", level ? ", level=(string)":"", level ? level : "", tier?"tier=(string)" : "", tier ? tier: "",
+                perf,
+                outMediaType);
         }
         else if (std::string(target) == "dp")
         {
