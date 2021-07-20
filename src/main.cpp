@@ -149,7 +149,7 @@ static std::string exec(const char* cmd) {
 
 static std::vector<std::string> GetIp()
 {
-    std::string s = exec("ifconfig | grep 'inet addr' | sed 's/.*inet addr:\\([^ ]*\\).*/\\1/'");
+    std::string s = exec("ifconfig | grep 'inet ' | sed 's/.*inet *\\([^ ]*\\).*/\\1/'");
 
     std::vector<std::string> rarray;
     std::size_t pos;
@@ -190,7 +190,7 @@ static std::string FindMIPIDev()
 
 static std::vector<std::string> GetMonitorResolution(std::string& all)
 {
-    all = exec("modetest -M xlnx -c| awk '/name refresh/ {f=1;next}  /props:/{f=0;} f{print $1 \"@\" $2} '");
+    all = exec("modetest -M xlnx -c| awk '/name refresh/ {f=1;next}  /props:/{f=0;} f{print $2 \"@\" $3} '");
 
     std::string s = all;
     std::vector<std::string> rarray;
@@ -460,7 +460,7 @@ main (int argc, char *argv[])
 
     if (std::string(target) == "dp")
     {
-        if (access( "/dev/dri/by-path/platform-fd4a0000.zynqmp-display-card", F_OK ) != 0 )
+        if (access( "/dev/dri/by-path/platform-fd4a0000.display-card", F_OK ) != 0 )
         {
           g_printerr ("Error: zynqmp-display device is not ready.\n%s", filename, msgFirmware);
           return 1;
