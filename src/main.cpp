@@ -660,7 +660,7 @@ main (int argc, char *argv[])
         else if (std::string(target) == "dp")
         {
             sprintf(pip + strlen(pip), "\
-                    ! queue %s ! kmssink driver-name=xlnx plane-id=39 sync=false fullscreen-overlay=true", perf);
+                    ! queue %s ! kmssink driver-name=xlnx plane-id=39 sync=%s fullscreen-overlay=true", perf, filename? "true" : "false");
         }
 
         GstElement *pipeline = gst_parse_launch(pip, NULL);
