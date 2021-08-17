@@ -544,6 +544,8 @@ main (int argc, char *argv[])
                     confdir.c_str(),
                     confdir.c_str(),
                     filename? 0 : 2, confdir.c_str());
+        } else if (screenfps){
+            sprintf( pip + strlen(pip), " ! queue ! ivas_xfilter kernels-config=\"%s/drawresult.json\" ", confdir.c_str() );
         }
     }
 

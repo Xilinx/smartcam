@@ -518,9 +518,8 @@ extern "C"
     infer_meta = ((GstInferenceMeta *) gst_buffer_get_meta ((GstBuffer *)
             frameinfo->inframe->app_priv, gst_inference_meta_api_get_type ()));
     if (infer_meta == NULL) {
-      LOG_MESSAGE (LOG_LEVEL_ERROR,
+      LOG_MESSAGE (LOG_LEVEL_WARNING,
           "ivas meta data is not available for postdpu");
-      return false;
     } else {
       LOG_MESSAGE (LOG_LEVEL_DEBUG, "ivas_mata ptr %p", infer_meta);
     }
@@ -544,6 +543,7 @@ extern "C"
     }
 
 
+    if (infer_meta != NULL) {
     /* Print the entire prediction tree */
     pstr = gst_inference_prediction_to_string (infer_meta->prediction);
     LOG_MESSAGE (LOG_LEVEL_DEBUG, "Prediction tree: \n%s", pstr);
@@ -551,6 +551,7 @@ extern "C"
 
     g_node_traverse (infer_meta->prediction->predictions, G_PRE_ORDER,
         G_TRAVERSE_ALL, -1, overlay_node_foreach, kpriv);
+    }
 
     fps_overlay(kpriv);
     return 0;
