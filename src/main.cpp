@@ -645,7 +645,7 @@ main (int argc, char *argv[])
                 ! video/x-%s, alignment=au\
                 %s%s %s%s %s%s \
                 %s \
-                ! filesink location=./out.%s",
+                ! filesink location=./out.%s async=false",
                 roiOff ? "" : " ! queue ! ivas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
                 outMediaType,
                 roiOff ? "auto" : "1",
