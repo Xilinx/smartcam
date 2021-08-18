@@ -39,7 +39,7 @@ static gchar* target = (gchar*)"dp";
 static gchar* aitask = (gchar*)"facedetect";
 
 static gchar* controlRate = (gchar*)"low-latency";
-static gchar* targetBitrate = NULL;
+static gchar* targetBitrate = (gchar*)"3000";
 static gchar* gopLength = (gchar*)"60";
 
 static gchar* profile = NULL;
@@ -83,7 +83,7 @@ static GOptionEntry entries[] =
     { "ROI-off", 0, 0, G_OPTION_ARG_NONE, &roiOff, "turn off ROI", NULL },
 
     { "control-rate", 0, 0, G_OPTION_ARG_STRING, &controlRate, "Encoder parameter control-rate", "low-latency" },
-    { "target-bitrate", 0, 0, G_OPTION_ARG_STRING, &targetBitrate, "Encoder parameter target-bitrate", NULL },
+    { "target-bitrate", 0, 0, G_OPTION_ARG_STRING, &targetBitrate, "Encoder parameter target-bitrate", targetBitrate},
     { "gop-length", 0, 0, G_OPTION_ARG_STRING, &gopLength, "Encoder parameter gop-length", "60"},
 
     { "profile", 0, 0, G_OPTION_ARG_STRING, &profile, "Encoder parameter profile.", NULL },

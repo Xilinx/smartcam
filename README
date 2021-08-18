@@ -229,6 +229,13 @@
          -R, --report               report fps
          -s, --screenfps            display fps on screen, notic this will cause perfermance degradation.
          --ROI-off                  turn off ROI (Region-of-Interest)
+         --control-rate=low-latency Encoder parameter control-rate
+         --target-bitrate=3000      Encoder parameter target-bitrate
+         --gop-length=60            Encoder parameter gop-length
+         --profile                  Encoder parameter profile
+         --level                    Encoder parameter level
+         --tier                     Encoder parameter tier
+         --encodeEnhancedParam      String for fully customizing the encoder in the form "param1=val1, param2=val2,...", where paramn is the name of the encoder parameter
         ```
         
     
