@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __IVAS_AIRENDER_H__
-#define __IVAS_AIRENDER_H__
+#ifndef __VVAS_AIRENDER_H__
+#define __VVAS_AIRENDER_H__
 
 enum
 {
@@ -45,4 +45,4 @@ enum
   } while (0); \
 }
 
-#endif /* __IVAS_AIRENDER_H__  */
+#endif /* __VVAS_AIRENDER_H__  */

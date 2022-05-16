@@ -21,11 +21,11 @@
 #include <iostream>
 #include <sstream>
 #include <math.h>
-#include <ivas/ivas_kernel.h>
-#include <gst/ivas/gstinferencemeta.h>
+#include <vvas/vvas_kernel.h>
+#include <gst/vvas/gstinferencemeta.h>
 #include <chrono>
 
-#include "ivas_airender.hpp"
+#include "vvas_airender.hpp"
 
 int log_level = LOG_LEVEL_WARNING;
 
@@ -44,7 +44,7 @@ struct color
   unsigned int red;
 };
 
-struct ivass_xclassification
+struct vvass_xclassification
 {
   color class_color;
   char class_name[MAX_CLASS_LEN];
@@ -52,7 +52,7 @@ struct ivass_xclassification
 
 struct overlayframe_info
 {
-  IVASFrame *inframe;
+  VVASFrame *inframe;
   Mat image;
   Mat I420image;
   Mat NV12image;
@@ -64,7 +64,7 @@ struct overlayframe_info
 
 using Clock = std::chrono::steady_clock;
 
-struct ivas_xoverlaypriv
+struct vvas_xoverlaypriv
 {
   float font_size;
   unsigned int font;
@@ -74,7 +74,7 @@ struct ivas_xoverlaypriv
   char label_filter[MAX_ALLOWED_LABELS][MAX_LABEL_LEN];
   unsigned char label_filter_cnt;
   unsigned short classes_count;
-  ivass_xclassification class_list[MAX_ALLOWED_CLASS];
+  vvass_xclassification class_list[MAX_ALLOWED_CLASS];
   struct overlayframe_info frameinfo;
   int drawfps;
   int fps_interv;
@@ -87,7 +87,7 @@ struct ivas_xoverlaypriv
 
 /* Check if the given classification is to be filtered */
 int
-ivas_classification_is_allowed (char *cls_name, ivas_xoverlaypriv * kpriv)
+vvas_classification_is_allowed (char *cls_name, vvas_xoverlaypriv * kpriv)
 {
   unsigned int idx;
 
@@ -117,7 +117,7 @@ convert_rgb_to_yuv_clrs (color clr, unsigned char *y, unsigned short *uv)
 
 /* Compose label text based on config json */
 bool
-get_label_text (GstInferenceClassification * c, ivas_xoverlaypriv * kpriv,
+get_label_text (GstInferenceClassification * c, vvas_xoverlaypriv * kpriv,
     char *label_string)
 {
   unsigned char idx = 0, buffIdx = 0;
@@ -139,7 +139,7 @@ get_label_text (GstInferenceClassification * c, ivas_xoverlaypriv * kpriv,
 static gboolean
 overlay_node_foreach (GNode * node, gpointer kpriv_ptr)
 {
-  ivas_xoverlaypriv *kpriv = (ivas_xoverlaypriv *) kpriv_ptr;
+  vvas_xoverlaypriv *kpriv = (vvas_xoverlaypriv *) kpriv_ptr;
   struct overlayframe_info *frameinfo = &(kpriv->frameinfo);
   LOG_MESSAGE (LOG_LEVEL_DEBUG, "enter");
 
@@ -152,7 +152,7 @@ overlay_node_foreach (GNode * node, gpointer kpriv_ptr)
       classes; classes = g_list_next (classes)) {
     classification = (GstInferenceClassification *) classes->data;
 
-    int idx = ivas_classification_is_allowed ((char *)
+    int idx = vvas_classification_is_allowed ((char *)
         classification->class_label, kpriv);
     if (kpriv->classes_count && idx == -1)
       continue;
@@ -198,7 +198,7 @@ overlay_node_foreach (GNode * node, gpointer kpriv_ptr)
         classification->class_prob);
 
     /* Check whether the frame is NV12 or BGR and act accordingly */
-    if (frameinfo->inframe->props.fmt == IVAS_VFMT_Y_UV8_420) {
+    if (frameinfo->inframe->props.fmt == VVAS_VFMT_Y_UV8_420) {
       LOG_MESSAGE (LOG_LEVEL_DEBUG, "Drawing rectangle for NV12 image");
       unsigned char yScalar;
       unsigned short uvScalar;
@@ -241,7 +241,7 @@ overlay_node_foreach (GNode * node, gpointer kpriv_ptr)
                 new_ymin / 2 + frameinfo->y_offset / 2), kpriv->font,
             kpriv->font_size / 2, Scalar (uvScalar), 1, 1);
       }
-    } else if (frameinfo->inframe->props.fmt == IVAS_VFMT_BGR8) {
+    } else if (frameinfo->inframe->props.fmt == VVAS_VFMT_BGR8) {
       LOG_MESSAGE (LOG_LEVEL_DEBUG, "Drawing rectangle for BGR image");
 
       if (!(!prediction->bbox.x && !prediction->bbox.y)) {
@@ -277,7 +277,7 @@ overlay_node_foreach (GNode * node, gpointer kpriv_ptr)
 static void
 fps_overlay(gpointer kpriv_ptr)
 {
-  ivas_xoverlaypriv *kpriv = (ivas_xoverlaypriv *) kpriv_ptr;
+  vvas_xoverlaypriv *kpriv = (vvas_xoverlaypriv *) kpriv_ptr;
   if (!kpriv->drawfps)
   {
       return ;
@@ -306,7 +306,7 @@ fps_overlay(gpointer kpriv_ptr)
       oss  << "Framerate:" << kpriv->fps << " FPS";
       Size textsize;
 
-      if (frameinfo->inframe->props.fmt == IVAS_VFMT_Y_UV8_420) {
+      if (frameinfo->inframe->props.fmt == VVAS_VFMT_Y_UV8_420) {
           unsigned char yScalar;
           unsigned short uvScalar;
           convert_rgb_to_yuv_clrs (clr, &yScalar, &uvScalar);
@@ -320,7 +320,7 @@ fps_overlay(gpointer kpriv_ptr)
                           new_ymin / 2), kpriv->font,
                       kpriv->font_size / 2, Scalar (uvScalar), 1, 1);
           }
-      } else if (frameinfo->inframe->props.fmt == IVAS_VFMT_BGR8) {
+      } else if (frameinfo->inframe->props.fmt == VVAS_VFMT_BGR8) {
           LOG_MESSAGE (LOG_LEVEL_DEBUG, "Drawing rectangle for BGR image");
           {
               /* Draw label text on the filled rectanngle */
@@ -338,12 +338,12 @@ fps_overlay(gpointer kpriv_ptr)
 
 extern "C"
 {
-  int32_t xlnx_kernel_init (IVASKernel * handle)
+  int32_t xlnx_kernel_init (VVASKernel * handle)
   {
     LOG_MESSAGE (LOG_LEVEL_DEBUG, "enter");
 
-    ivas_xoverlaypriv *kpriv =
-        (ivas_xoverlaypriv *) calloc (1, sizeof (ivas_xoverlaypriv));
+    vvas_xoverlaypriv *kpriv =
+        (vvas_xoverlaypriv *) calloc (1, sizeof (vvas_xoverlaypriv));
 
     json_t *jconfig = handle->kernel_config;
     json_t *val, *karray = NULL, *classes = NULL;
@@ -489,10 +489,10 @@ extern "C"
     return 0;
   }
 
-  uint32_t xlnx_kernel_deinit (IVASKernel * handle)
+  uint32_t xlnx_kernel_deinit (VVASKernel * handle)
   {
     LOG_MESSAGE (LOG_LEVEL_DEBUG, "enter");
-    ivas_xoverlaypriv *kpriv = (ivas_xoverlaypriv *) handle->kernel_priv;
+    vvas_xoverlaypriv *kpriv = (vvas_xoverlaypriv *) handle->kernel_priv;
 
     if (kpriv)
       free (kpriv);
@@ -501,14 +501,14 @@ extern "C"
   }
 
 
-  uint32_t xlnx_kernel_start (IVASKernel * handle, int start,
-      IVASFrame * input[MAX_NUM_OBJECT], IVASFrame * output[MAX_NUM_OBJECT])
+  uint32_t xlnx_kernel_start (VVASKernel * handle, int start,
+      VVASFrame * input[MAX_NUM_OBJECT], VVASFrame * output[MAX_NUM_OBJECT])
   {
     LOG_MESSAGE (LOG_LEVEL_DEBUG, "enter");
     GstInferenceMeta *infer_meta = NULL;
     char *pstr;
 
-    ivas_xoverlaypriv *kpriv = (ivas_xoverlaypriv *) handle->kernel_priv;
+    vvas_xoverlaypriv *kpriv = (vvas_xoverlaypriv *) handle->kernel_priv;
     struct overlayframe_info *frameinfo = &(kpriv->frameinfo);
     frameinfo->y_offset = 0;
     frameinfo->inframe = input[0];
@@ -519,12 +519,12 @@ extern "C"
             frameinfo->inframe->app_priv, gst_inference_meta_api_get_type ()));
     if (infer_meta == NULL) {
       LOG_MESSAGE (LOG_LEVEL_WARNING,
-          "ivas meta data is not available for postdpu");
+          "vvas meta data is not available for postdpu");
     } else {
-      LOG_MESSAGE (LOG_LEVEL_DEBUG, "ivas_mata ptr %p", infer_meta);
+      LOG_MESSAGE (LOG_LEVEL_DEBUG, "vvas_mata ptr %p", infer_meta);
     }
 
-    if (frameinfo->inframe->props.fmt == IVAS_VFMT_Y_UV8_420) {
+    if (frameinfo->inframe->props.fmt == VVAS_VFMT_Y_UV8_420) {
       LOG_MESSAGE (LOG_LEVEL_DEBUG, "Input frame is in NV12 format\n");
       frameinfo->lumaImg.create (input[0]->props.height, input[0]->props.stride,
           CV_8UC1);
@@ -532,7 +532,7 @@ extern "C"
       frameinfo->chromaImg.create (input[0]->props.height / 2,
           input[0]->props.stride / 2, CV_16UC1);
       frameinfo->chromaImg.data = (unsigned char *) chromaBuf;
-    } else if (frameinfo->inframe->props.fmt == IVAS_VFMT_BGR8) {
+    } else if (frameinfo->inframe->props.fmt == VVAS_VFMT_BGR8) {
       LOG_MESSAGE (LOG_LEVEL_DEBUG, "Input frame is in BGR format\n");
       frameinfo->image.create (input[0]->props.height,
           input[0]->props.stride / 3, CV_8UC3);
@@ -558,7 +558,7 @@ extern "C"
   }
 
 
-  int32_t xlnx_kernel_done (IVASKernel * handle)
+  int32_t xlnx_kernel_done (VVASKernel * handle)
   {
     LOG_MESSAGE (LOG_LEVEL_DEBUG, "enter");
     return 0;

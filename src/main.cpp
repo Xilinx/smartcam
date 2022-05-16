@@ -498,7 +498,7 @@ main (int argc, char *argv[])
 
     loop = g_main_loop_new (NULL, FALSE);
 
-    std::string confdir("/opt/xilinx/share/ivas/smartcam/");
+    std::string confdir("/opt/xilinx/share/vvas/smartcam/");
     confdir += (aitask);
     char pip[2500];
     pip[0] = '\0';
@@ -535,17 +535,17 @@ main (int argc, char *argv[])
 
         if (!nodet) {
             sprintf(pip + strlen(pip), " ! tee name=t \
-                    ! queue ! ivas_xmultisrc kconfig=\"%s/preprocess.json\" \
-                    ! queue ! ivas_xfilter kernels-config=\"%s/aiinference.json\" \
+                    ! queue ! vvas_xmultisrc kconfig=\"%s/preprocess.json\" \
+                    ! queue ! vvas_xfilter kernels-config=\"%s/aiinference.json\" \
                     ! ima.sink_master \
-                    ivas_xmetaaffixer name=ima ima.src_master ! fakesink \
+                    vvas_xmetaaffixer name=ima ima.src_master ! fakesink \
                     t. \
-                    ! queue max-size-buffers=1 leaky=%d ! ima.sink_slave_0 ima.src_slave_0 ! queue ! ivas_xfilter kernels-config=\"%s/drawresult.json\" ",
+                    ! queue max-size-buffers=1 leaky=%d ! ima.sink_slave_0 ima.src_slave_0 ! queue ! vvas_xfilter kernels-config=\"%s/drawresult.json\" ",
                     confdir.c_str(),
                     confdir.c_str(),
                     filename? 0 : 2, confdir.c_str());
         } else if (screenfps){
-            sprintf( pip + strlen(pip), " ! queue ! ivas_xfilter kernels-config=\"%s/drawresult.json\" ", confdir.c_str() );
+            sprintf( pip + strlen(pip), " ! queue ! vvas_xfilter kernels-config=\"%s/drawresult.json\" ", confdir.c_str() );
         }
     }
 
@@ -575,7 +575,7 @@ main (int argc, char *argv[])
                 ! video/x-%s, alignment=au\
                 %s%s %s%s %s%s \
                 ",
-                roiOff ? "" : " ! queue ! ivas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
+                roiOff ? "" : " ! queue ! vvas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
                 outMediaType,
                 roiOff ? "auto" : "1",
                 controlRate, targetBitrate?"target-bitrate=":"", targetBitrate?targetBitrate:"", gopLength,
@@ -648,7 +648,7 @@ main (int argc, char *argv[])
                 %s%s %s%s %s%s \
                 %s \
                 ! filesink location=./out.%s async=false",
-                roiOff ? "" : " ! queue ! ivas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
+                roiOff ? "" : " ! queue ! vvas_xroigen roi-type=1 roi-qp-delta=-10 roi-max-num=10 ",
                 outMediaType,
                 roiOff ? "auto" : "1",
                 controlRate, targetBitrate?"target-bitrate=":"", targetBitrate?targetBitrate:"", gopLength,

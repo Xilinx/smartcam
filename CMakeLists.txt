@@ -29,19 +29,19 @@ find_package(OpenCV REQUIRED)
 
 SET(INSTALL_PATH "opt/xilinx")
 
-add_library(ivas_xpp SHARED src/ivas_xpp_pipeline.c)
-target_include_directories(ivas_xpp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(ivas_xpp
-  jansson ivasutil gstivasinfermeta-1.0)
-install(TARGETS ivas_xpp DESTINATION ${INSTALL_PATH}/lib)
+add_library(vvas_xpp SHARED src/vvas_xpp_pipeline.c)
+target_include_directories(vvas_xpp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(vvas_xpp
+  jansson vvasutil gstvvasinfermeta-1.0)
+install(TARGETS vvas_xpp DESTINATION ${INSTALL_PATH}/lib)
 
-add_library(ivas_airender SHARED src/ivas_airender.cpp)
-target_include_directories(ivas_airender PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(ivas_airender 
-    jansson ivasutil gstivasinfermeta-1.0 
+add_library(vvas_airender SHARED src/vvas_airender.cpp)
+target_include_directories(vvas_airender PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(vvas_airender 
+    jansson vvasutil gstvvasinfermeta-1.0 
     gstreamer-1.0 gstbase-1.0 glib-2.0
     opencv_core opencv_video opencv_videoio opencv_imgproc)
-install(TARGETS ivas_airender DESTINATION ${INSTALL_PATH}/lib)
+install(TARGETS vvas_airender DESTINATION ${INSTALL_PATH}/lib)
 
 
 add_executable(${CMAKE_PROJECT_NAME} src/main.cpp)
@@ -70,7 +70,7 @@ install(DIRECTORY
     config/facedetect
     config/refinedet
     config/ssd
-    DESTINATION ${INSTALL_PATH}/share/ivas/${CMAKE_PROJECT_NAME}/)
+    DESTINATION ${INSTALL_PATH}/share/vvas/${CMAKE_PROJECT_NAME}/)
 
 install(FILES
     config/ssd/label.json

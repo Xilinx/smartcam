@@ -321,7 +321,7 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
       |`02.mipi-dp.sh`   | call smartcam to run facedetction and display on DP display.|
       |`03.file-file.sh` | call smartcam to run facedetction and display on input h264/5 file and generate output h264/5 with detection boxes.|
 
-    * Configuration File Directory: /opt/xilinx/share/ivas/smartcam/${AITASK}
+    * Configuration File Directory: /opt/xilinx/share/vvas/smartcam/${AITASK}
     
       AITASK = "facedetect" | "refinedet" | "ssd"
 

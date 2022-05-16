@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <ivas/ivas_kernel.h>
+#include <vvas/vvas_kernel.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -26,25 +26,25 @@ typedef struct _kern_priv
     float scale_r;
     float scale_g;
     float scale_b;
-    IVASFrame *params;
+    VVASFrame *params;
 } ResizeKernelPriv;
 
 int32_t
-xlnx_kernel_start(IVASKernel *handle, int start, IVASFrame *input[MAX_NUM_OBJECT], IVASFrame *output[MAX_NUM_OBJECT]);
-int32_t xlnx_kernel_done(IVASKernel *handle);
-int32_t xlnx_kernel_init(IVASKernel *handle);
-uint32_t xlnx_kernel_deinit(IVASKernel *handle);
+xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NUM_OBJECT], VVASFrame *output[MAX_NUM_OBJECT]);
+int32_t xlnx_kernel_done(VVASKernel *handle);
+int32_t xlnx_kernel_init(VVASKernel *handle);
+uint32_t xlnx_kernel_deinit(VVASKernel *handle);
 
-uint32_t xlnx_kernel_deinit(IVASKernel *handle)
+uint32_t xlnx_kernel_deinit(VVASKernel *handle)
 {
     ResizeKernelPriv *kernel_priv;
     kernel_priv = (ResizeKernelPriv *)handle->kernel_priv;
-    ivas_free_buffer (handle, kernel_priv->params);
+    vvas_free_buffer (handle, kernel_priv->params);
     free(kernel_priv);
     return 0;
 }
 
-int32_t xlnx_kernel_init(IVASKernel *handle)
+int32_t xlnx_kernel_init(VVASKernel *handle)
 {
     json_t *jconfig = handle->kernel_config;
     json_t *val; /* kernel config from app */
@@ -103,7 +103,7 @@ int32_t xlnx_kernel_init(IVASKernel *handle)
 	kernel_priv->scale_b = json_number_value(val);
     printf("Resize: scale_b=%f\n", kernel_priv->scale_b);
 
-    kernel_priv->params = ivas_alloc_buffer (handle, 6*(sizeof(float)), IVAS_INTERNAL_MEMORY, NULL);
+    kernel_priv->params = vvas_alloc_buffer (handle, 6*(sizeof(float)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
     pPtr = kernel_priv->params->vaddr[0];
     pPtr[0] = (float)kernel_priv->mean_r;  
     pPtr[1] = (float)kernel_priv->mean_g;  
@@ -117,33 +117,33 @@ int32_t xlnx_kernel_init(IVASKernel *handle)
     return 0;
 }
 
-int32_t xlnx_kernel_start(IVASKernel *handle, int start, IVASFrame *input[MAX_NUM_OBJECT], IVASFrame *output[MAX_NUM_OBJECT])
+int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NUM_OBJECT], VVASFrame *output[MAX_NUM_OBJECT])
 {
     ResizeKernelPriv *kernel_priv;
     kernel_priv = (ResizeKernelPriv *)handle->kernel_priv;
 
-    ivas_register_write(handle, &(input[0]->props.width), sizeof(uint32_t), 0x40);   /* In width */
-    ivas_register_write(handle, &(input[0]->props.height), sizeof(uint32_t), 0x48);  /* In height */
-    ivas_register_write(handle, &(input[0]->props.stride), sizeof(uint32_t), 0x50);  /* In stride */
+    vvas_register_write(handle, &(input[0]->props.width), sizeof(uint32_t), 0x40);   /* In width */
+    vvas_register_write(handle, &(input[0]->props.height), sizeof(uint32_t), 0x48);  /* In height */
+    vvas_register_write(handle, &(input[0]->props.stride), sizeof(uint32_t), 0x50);  /* In stride */
 
-    ivas_register_write(handle, &(output[0]->props.width), sizeof(uint32_t), 0x58);  /* Out width */
-    ivas_register_write(handle, &(output[0]->props.height), sizeof(uint32_t), 0x60); /* Out height */
-    ivas_register_write(handle, &(output[0]->props.width), sizeof(uint32_t), 0x68); /* Out stride */
+    vvas_register_write(handle, &(output[0]->props.width), sizeof(uint32_t), 0x58);  /* Out width */
+    vvas_register_write(handle, &(output[0]->props.height), sizeof(uint32_t), 0x60); /* Out height */
+    vvas_register_write(handle, &(output[0]->props.width), sizeof(uint32_t), 0x68); /* Out stride */
 
-    ivas_register_write(handle, &(input[0]->paddr[0]), sizeof(uint64_t), 0x10);      /* Y Input */
-    ivas_register_write(handle, &(input[0]->paddr[1]), sizeof(uint64_t), 0x1C);      /* UV Input */
-    ivas_register_write(handle, &(output[0]->paddr[0]), sizeof(uint64_t), 0x28);      /* Output */
-    ivas_register_write(handle, &(kernel_priv->params->paddr[0]), sizeof(uint64_t), 0x34);     /* Params */
+    vvas_register_write(handle, &(input[0]->paddr[0]), sizeof(uint64_t), 0x10);      /* Y Input */
+    vvas_register_write(handle, &(input[0]->paddr[1]), sizeof(uint64_t), 0x1C);      /* UV Input */
+    vvas_register_write(handle, &(output[0]->paddr[0]), sizeof(uint64_t), 0x28);      /* Output */
+    vvas_register_write(handle, &(kernel_priv->params->paddr[0]), sizeof(uint64_t), 0x34);     /* Params */
 
-    ivas_register_write(handle, &start, sizeof(uint32_t), 0x0);                      /* start */
+    vvas_register_write(handle, &start, sizeof(uint32_t), 0x0);                      /* start */
     return 0;
 }
 
-int32_t xlnx_kernel_done(IVASKernel *handle)
+int32_t xlnx_kernel_done(VVASKernel *handle)
 {
     uint32_t val = 0, count = 0;
     do {
-        ivas_register_read(handle, &val, sizeof(uint32_t), 0x0); /* start */
+        vvas_register_read(handle, &val, sizeof(uint32_t), 0x0); /* start */
         count++;
         if (count > 1000000) {
             printf("ERROR: kernel done wait TIME OUT !!\n");
