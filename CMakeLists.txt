@@ -32,13 +32,13 @@ SET(INSTALL_PATH "opt/xilinx")
 add_library(vvas_xpp SHARED src/vvas_xpp_pipeline.c)
 target_include_directories(vvas_xpp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(vvas_xpp
-  jansson vvasutil gstvvasinfermeta-1.0)
+  jansson vvasutil-2.0 gstvvasinfermeta-2.0)
 install(TARGETS vvas_xpp DESTINATION ${INSTALL_PATH}/lib)
 
 add_library(vvas_airender SHARED src/vvas_airender.cpp)
 target_include_directories(vvas_airender PRIVATE ${GSTREAMER_INCLUDE_DIRS})
 target_link_libraries(vvas_airender 
-    jansson vvasutil gstvvasinfermeta-1.0 
+    jansson vvasutil-2.0 gstvvasinfermeta-2.0 
     gstreamer-1.0 gstbase-1.0 glib-2.0
     opencv_core opencv_video opencv_videoio opencv_imgproc)
 install(TARGETS vvas_airender DESTINATION ${INSTALL_PATH}/lib)

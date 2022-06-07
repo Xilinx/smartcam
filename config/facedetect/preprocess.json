@@ -4,7 +4,7 @@
   "element-mode": "transform",
   "kernels": [
     {
-      "kernel-name": "pp_pipeline_accel:pp_pipeline_accel_1",
+      "kernel-name": "pp_pipeline_accel:{pp_pipeline_accel_1}",
       "library-name": "libvvas_xpp.so",
       "config": {
         "debug_level" : 1,

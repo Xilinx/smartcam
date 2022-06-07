@@ -17,6 +17,35 @@
 #include <vvas/vvas_kernel.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+
+enum
+{
+  LOG_LEVEL_ERROR,
+  LOG_LEVEL_WARNING,
+  LOG_LEVEL_INFO,
+  LOG_LEVEL_DEBUG
+};
+
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define LOG_MESSAGE(level, ...) {\
+  do {\
+    char *str; \
+    if (level == LOG_LEVEL_ERROR)\
+      str = (char*)"ERROR";\
+    else if (level == LOG_LEVEL_WARNING)\
+      str = (char*)"WARNING";\
+    else if (level == LOG_LEVEL_INFO)\
+      str = (char*)"INFO";\
+    else if (level == LOG_LEVEL_DEBUG)\
+      str = (char*)"DEBUG";\
+    if (level <= kernel_priv->log_level) {\
+      printf("[%s %s:%d] %s: ",__FILENAME__, __func__, __LINE__, str);\
+      printf(__VA_ARGS__);\
+      printf("\n");\
+    }\
+  } while (0); \
+}
 
 typedef struct _kern_priv
 {
@@ -27,6 +56,7 @@ typedef struct _kern_priv
     float scale_g;
     float scale_b;
     VVASFrame *params;
+    int log_level;
 } ResizeKernelPriv;
 
 int32_t
@@ -51,6 +81,7 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
     ResizeKernelPriv *kernel_priv;
     float *pPtr; 
 
+    handle->is_multiprocess = 0;
     kernel_priv = (ResizeKernelPriv *)calloc(1, sizeof(ResizeKernelPriv));
     if (!kernel_priv) {
         printf("Error: Unable to allocate resize kernel memory\n");
@@ -103,6 +134,14 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
 	kernel_priv->scale_b = json_number_value(val);
     printf("Resize: scale_b=%f\n", kernel_priv->scale_b);
 
+    val = json_object_get (jconfig, "debug_level");
+    if (!val || !json_is_integer (val))
+        kernel_priv->log_level = LOG_LEVEL_WARNING;
+    else
+        kernel_priv->log_level = json_integer_value (val);
+
+
+
     kernel_priv->params = vvas_alloc_buffer (handle, 6*(sizeof(float)), VVAS_INTERNAL_MEMORY, DEFAULT_MEM_BANK, NULL);
     pPtr = kernel_priv->params->vaddr[0];
     pPtr[0] = (float)kernel_priv->mean_r;  
@@ -122,33 +161,34 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     ResizeKernelPriv *kernel_priv;
     kernel_priv = (ResizeKernelPriv *)handle->kernel_priv;
 
-    vvas_register_write(handle, &(input[0]->props.width), sizeof(uint32_t), 0x40);   /* In width */
-    vvas_register_write(handle, &(input[0]->props.height), sizeof(uint32_t), 0x48);  /* In height */
-    vvas_register_write(handle, &(input[0]->props.stride), sizeof(uint32_t), 0x50);  /* In stride */
+    int ret = vvas_kernel_start (handle, "ppppuuuuuu", 
+        (input[0]->paddr[0]),
+        (input[0]->paddr[1]),
+        (output[0]->paddr[0]),
+        (kernel_priv->params->paddr[0]),
+        (input[0]->props.width),
+        (input[0]->props.height),
+        (input[0]->props.stride),
+        (output[0]->props.width),
+        (output[0]->props.height),
+        (output[0]->props.width)
+        );
+    if (ret < 0) {
+      LOG_MESSAGE (LOG_LEVEL_ERROR, "Preprocess: failed to issue execute command");
+      return ret;
+    }
 
-    vvas_register_write(handle, &(output[0]->props.width), sizeof(uint32_t), 0x58);  /* Out width */
-    vvas_register_write(handle, &(output[0]->props.height), sizeof(uint32_t), 0x60); /* Out height */
-    vvas_register_write(handle, &(output[0]->props.width), sizeof(uint32_t), 0x68); /* Out stride */
+    /* wait for kernel completion */
+    ret = vvas_kernel_done (handle, 1000);
+    if (ret < 0) {
+      LOG_MESSAGE (LOG_LEVEL_ERROR, "Preprocess: failed to receive response from kernel");
+      return ret;
+    }
 
-    vvas_register_write(handle, &(input[0]->paddr[0]), sizeof(uint64_t), 0x10);      /* Y Input */
-    vvas_register_write(handle, &(input[0]->paddr[1]), sizeof(uint64_t), 0x1C);      /* UV Input */
-    vvas_register_write(handle, &(output[0]->paddr[0]), sizeof(uint64_t), 0x28);      /* Output */
-    vvas_register_write(handle, &(kernel_priv->params->paddr[0]), sizeof(uint64_t), 0x34);     /* Params */
-
-    vvas_register_write(handle, &start, sizeof(uint32_t), 0x0);                      /* start */
     return 0;
 }
 
 int32_t xlnx_kernel_done(VVASKernel *handle)
 {
-    uint32_t val = 0, count = 0;
-    do {
-        vvas_register_read(handle, &val, sizeof(uint32_t), 0x0); /* start */
-        count++;
-        if (count > 1000000) {
-            printf("ERROR: kernel done wait TIME OUT !!\n");
-            return 0;
-        }
-    } while (!(0x4 & val));
-    return 1;
+    return 0;
 }
