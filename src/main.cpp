@@ -462,7 +462,7 @@ main (int argc, char *argv[])
     {
         if (access( "/dev/dri/by-path/platform-fd4a0000.display-card", F_OK ) != 0 )
         {
-          g_printerr ("Error: zynqmp-display device is not ready.\n%s", filename, msgFirmware);
+          g_printerr ("Error: zynqmp-display device is not ready.\n%s", msgFirmware);
           return 1;
         }
 
@@ -561,7 +561,7 @@ main (int argc, char *argv[])
         if (filename && std::string(infileType) == std::string(outMediaType) && nodet)
         {
             sprintf(pip, "( multifilesrc location=%s ! %sparse ",
-                    filename, infileType, outMediaType
+                    filename, infileType
                     );
         }
         else
