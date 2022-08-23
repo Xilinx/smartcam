@@ -26,7 +26,7 @@ def main(appname):
     parser = argparse.ArgumentParser(prog=appname+'-install',
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  description='Script to copy {} Jupyter notebook to user directory'.format(appname))
-    parser.add_argument('-d', '--dir', type=pathlib.Path, help='Install the Jupyter notebook to the specified directory.', default=os.path.join("/home/petalinux/notebooks", "./{}".format(appname)) )
+    parser.add_argument('-d', '--dir', type=pathlib.Path, help='Install the Jupyter notebook to the specified directory.', default=os.path.join("{}/notebooks".format(os.path.expanduser("~")), "./{}".format(appname)) )
     parser.add_argument('-f', '--force', action='store_true', help='Force to install the Jupyter notebook even if the destination directory exists.')
     args = parser.parse_args()
     destdir = os.path.abspath(args.dir)
