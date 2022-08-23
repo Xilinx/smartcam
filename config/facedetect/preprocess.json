@@ -1,6 +1,6 @@
 {
   "xclbin-location":"/lib/firmware/xilinx/kv260-smartcam/kv260-smartcam.xclbin",
-  "vvas-library-repo": "/opt/xilinx/lib",
+  "vvas-library-repo": "/opt/xilinx/kv260-smartcam/lib",
   "element-mode": "transform",
   "kernels": [
     {

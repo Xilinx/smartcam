@@ -22,7 +22,7 @@ import sys
 import shutil
 
 def main(appname):
-    note_dir="/opt/xilinx/share/notebooks/"+appname
+    note_dir="/opt/xilinx/kv260-"+appname+"/share/notebooks/"
     parser = argparse.ArgumentParser(prog=appname+'-install',
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  description='Script to copy {} Jupyter notebook to user directory'.format(appname))

@@ -130,7 +130,7 @@ Output example:
 
 > Currently running servers:
 >
-> `http://ip:port/?token=xxxxxxxxxxxxxxxxxx`  :: /opt/xilinx/share/notebooks
+> `http://ip:port/?token=xxxxxxxxxxxxxxxxxx`  ::  /home/petalinux/notebooks
 
 ## Command line
 These allow the user to define different video input and output device targets using the "smartcam" application. These are to be executed using the UART/debug interface.
@@ -307,13 +307,13 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
 
 * The application is installed as:
 
-    * Binary File Directory: /opt/xilinx/bin
+    * Binary File Directory: /opt/xilinx/kv260-smartcam/bin
 
       | filename | description |
       |----------|-------------|
       |smartcam| main app|
 
-    * Script File Directory: /opt/xilinx/bin/ <a name="script-loc"></a>
+    * Script File Directory: /opt/xilinx/kv260-smartcam/bin/ <a name="script-loc"></a>
 
       | filename | description |
       |------------------|-------------|
@@ -321,7 +321,7 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
       |`02.mipi-dp.sh`   | call smartcam to run facedetction and display on DP display.|
       |`03.file-file.sh` | call smartcam to run facedetction and display on input h264/5 file and generate output h264/5 with detection boxes.|
 
-    * Configuration File Directory: /opt/xilinx/share/vvas/smartcam/${AITASK}
+    * Configuration File Directory: /opt/xilinx/kv260-smartcam/share/vvas/smartcam/${AITASK}
     
       AITASK = "facedetect" | "refinedet" | "ssd"
 
@@ -331,10 +331,21 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
       |aiinference.json| Config of AI inference (facedetect\|refinedet\|ssd) |
       |drawresult.json| Config of boundbox drawing |
 
-    * Jupyter notebook file: => /opt/xilinx/share/notebooks/smartcam
+    *  Model files: => /opt/xilinx/kv260-smartcam/share/models
+
+      The model files integrated in the application use the B3136 DPU configuration.
+
+      | foldername | description |
+      |----------|-------------|
+      |densebox_640_360 | Model files for facedetcet|
+      |refinedet_pruned_0_96| Model files for refinedet|
+      |ssd_adas_pruned_0_95| Model files for ssd|	  
+        
+
+    * Jupyter notebook file: => /opt/xilinx/kv260-smartcam/share/notebooks/
 
       | filename | description |
       |----------|-------------|
       |smartcam.ipynb | Jupyter notebook file for MIPI --> DP/RTSP demo.|
 
-<p align="center"><sup>Copyright&copy; 2021 Xilinx</sup></p>
+<p align="center"><sup>Copyright&copy; 2022 Xilinx</sup></p>

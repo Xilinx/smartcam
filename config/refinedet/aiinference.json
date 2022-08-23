@@ -8,7 +8,7 @@
       "config": {
 	"model-name" : "refinedet_pruned_0_96",
 	"model-class" : "REFINEDET",
-	"model-path" : "/opt/xilinx/share/vitis_ai_library/models/kv260-smartcam",
+	"model-path" : "/opt/xilinx/kv260-smartcam/share/vitis_ai_library/models/",
 	"run_time_model" : false,
 	"need_preprocess" : false,
 	"performance_test" : false,

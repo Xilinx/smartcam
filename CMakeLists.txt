@@ -27,7 +27,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(GStreamer REQUIRED)
 find_package(OpenCV REQUIRED)
 
-SET(INSTALL_PATH "opt/xilinx")
+SET(INSTALL_PATH "opt/xilinx/kv260-smartcam")
 
 add_library(vvas_xpp SHARED src/vvas_xpp_pipeline.c)
 target_include_directories(vvas_xpp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
@@ -70,16 +70,17 @@ install(DIRECTORY
     config/facedetect
     config/refinedet
     config/ssd
-    DESTINATION ${INSTALL_PATH}/share/vvas/${CMAKE_PROJECT_NAME}/)
+    DESTINATION ${INSTALL_PATH}/share/vvas/)
 
-install(FILES
-    config/ssd/label.json
-    DESTINATION ${INSTALL_PATH}/share/vitis_ai_library/models/kv260-${CMAKE_PROJECT_NAME}/ssd_adas_pruned_0_95/
-    )
+install(DIRECTORY
+    models/kv260/densebox_640_360
+	models/kv260/refinedet_pruned_0_96
+	models/kv260/ssd_adas_pruned_0_95
+    DESTINATION ${INSTALL_PATH}/share/vitis_ai_library/models/)
 
 install(DIRECTORY
     notebook/
-    DESTINATION ${INSTALL_PATH}/share/notebooks/${CMAKE_PROJECT_NAME}/)
+    DESTINATION ${INSTALL_PATH}/share/notebooks/)
 
 set(VERSION "1.0.1")
 set(CPACK_PACKAGE_VERSION ${VERSION})
