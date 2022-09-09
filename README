@@ -1,3 +1,7 @@
+/******************************************************************************
+* Copyright (C) 2010 - 2022 Xilinx, Inc. All rights reserved.
+* SPDX-License-Identifier: Apache-2.0
+******************************************************************************/
 
 1. Development Guide:
 
@@ -474,5 +478,3 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
       | filename | description |
       |----------|-------------|
       |smartcam.ipynb | Jupyter notebook file for MIPI --> DP/RTSP demo.|
-
-<p align="center"><sup>Copyright&copy; 2022 Xilinx</sup></p>
