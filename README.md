@@ -11,7 +11,7 @@ If you want to cross compile the source in Linux PC machine, follow these steps,
 
 # Setting up the Board
 
-1. Get the SD Card Image from [Boot Image Site](http://xilinx.com/) and follow the instructions in UG1089 to burn the SD card. And install the SD card to J11.
+1. Get the SD Card Image from [Boot Image Site](https://ubuntu.com/download/amd-xilinx) and follow the instructions in UG1089 to burn the SD card. And install the SD card to J11.
 
 2. Hardware Setup:
 
@@ -63,56 +63,176 @@ If you want to cross compile the source in Linux PC machine, follow these steps,
 
     Other than FFplay, VLC can also be used to play RTSP stream, but we find sometimes it doesn't work on some client machine, while the FFplay works well.
 
-4. Power on the board, login with username `petalinux`, and you need to setup the password for the first time bootup.
+4. Power on the board, and booting your Starter Kit (Ubuntu):
 
-5.  Get the latest application package.
+   * Follow the instruction from the page below to boot linux
 
-    1.  Get the list of available packages in the feed.
+  	https://www.xilinx.com/products/som/kria/kr260-robotics-starter-kit/kr260-getting-started/booting-your-starter-kit.html
 
-        `sudo xmutil      getpkgs`
+> **Note:** Steps under the section "Set up the Xilinx Development & Demonstration Environment for Ubuntu 22.04 LTS" may not be needed for TSN-ROS demo.
 
-    2.  Install the package with dnf install:
+5. Set System Timezone and locale:
 
-        `sudo dnf install packagegroup-kv260-smartcam.noarch`
+    * Set timezone
 
-    Note: For setups without access to the internet, it is possible to download and use the packages locally. Please refer to the `K260 SOM Starter Kit Tutorial` for instructions.
+       ```bash
+		sudo timedatectl set-ntp true
+		sudo timedatectl set-timezone America/Los_Angeles
+		timedatectl
+       ```
+	
+	* Set locale
 
-6.  Dynamically load the application package.
+       ```bash
+		sudo locale-gen en_US en_US.UTF-8
+		sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+		export LANG=en_US.UTF-8
+		locale
+       ```
 
-    The firmware consist of bitstream, device tree overlay (dtbo) and xclbin file. The firmware is loaded dynamically on user request once Linux is fully booted. The xmutil utility can be used for that purpose.
+6. Update Bootfirmware
 
-    1. Show the list and status of available acceleration platforms and AI Applications:
+    The SOM Starter Kits have factory pre-programmed boot firmware that is installed and maintained in the SOM QSPI device. Update the Boot firmware in the SOM QSPI device to '2022.1 Boot FW' Image.
 
-        `sudo xmutil      listapps`
+    Follow the link below to obtain Boot firmware binary and instructions to update QSPI image using xmutil, after linux boot.  
 
-    2.  Switch to a different platform for different AI Application:
+    https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM#Boot-Firmware-Updates
 
-        *  When xmutil listapps shows that there's no active accelerator, just activate the one you want to use.
+7. Install Docker from [here](https://docs.docker.com/engine/install/ubuntu/).
 
-            `sudo xmutil      loadapp kv260-smartcam`
+8. Get the latest kv260-smartcam firmware package:
 
-        *  When there's already an accelerator being activated, unload it first, then switch to the one you want.
+	* Add archive for the Xilinx Apps demo
 
-            `sudo xmutil      unloadapp `
+    ```bash
+    sudo add-apt-repository ppa:xilinx-apps
+    sudo apt update
+    sudo apt upgrade
+    ```
 
-            `sudo xmutil      loadapp kv260-smartcam`
+	* Search package feed for packages compatible with Kv260
 
-7. Getting demo video files suitable for the application:
+    ```bash
+		ubuntu@kria:~$ sudo apt search xlnx-firmware-kv260
+		Sorting... Done
+		Full Text Search... Done
+		xlnx-firmware-kv260-aibox-reid/jammy 0.1-0xlnx1 arm64
+		 FPGA firmware for Xilinx boards - kv260 aibox-reid application
 
-  To be able to demostrate the function of the application in case you have no MIPI and USB camera in hand, we support the file video source too.
+		xlnx-firmware-kv260-benchmark-b4096/jammy 0.1-0xlnx1 arm64
+		 FPGA firmware for Xilinx boards - kv260 benchmark-b4096 application
+
+		xlnx-firmware-kv260-defect-detect/jammy 0.1-0xlnx1 arm64
+		 FPGA firmware for Xilinx boards - kv260 defect-detect application
+
+		xlnx-firmware-kv260-nlp-smartvision/jammy,now 0.1-0xlnx1 arm64 
+		 FPGA firmware for Xilinx boards - kv260 nlp-smartvision application
+
+		xlnx-firmware-kv260-smartcam/jammy 0.1-0xlnx1 arm64 [installed]
+		 FPGA firmware for Xilinx boards - kv260 smartcam application
+    ```
+
+	* Install firmware binaries and restart dfx-mgr
+
+    ```bash
+    sudo apt install xlnx-firmware-kv260-smartcam
+    sudo systemctl restart dfx-mgr.service
+    ```
+
+    > Note : Installing firmware binaries (xlnx-firmware-kv260-smartcam) causes dfx-mgr to crash and a restart is needed, which is listed in the known issues section. Once this is fixed an newer updates are available for dfx-manager, restart may not be needed.
   
-  You can download video files from the following links, which is of MP4 format.
+9. Dynamically load the application package:
 
-  * Facedet / RefineDet AI Task:
-    * https://pixabay.com/videos/alley-people-walk-street-ukraine-39837/
-  * ADAS SSD AI Task:
-    * https://pixabay.com/videos/freeway-traffic-cars-rainy-truck-8358/
+    The firmware consist of bitstream, device tree overlay (dtbo) file. The firmware is loaded dynamically on user request once Linux is fully booted. The xmutil utility can be used for that purpose.
 
-  Then you need to transcode it to H264 file which is one supported input format.
+    * Disable the desktop environment:
+
+       ```bash
+       sudo xmutil      desktop_disable
+       ```
+
+       After running the application, the desktop environment can be enable again with:
+
+       ```bash
+       sudo xmutil      desktop_enable
+       ```
+
+    * Show the list and status of available acceleration platforms :
+
+       ```bash
+      sudo xmutil listapps
+        ```
+
+    * Switch to a different platform for different Application:
+
+       When there's already another accelerator/firmware being activated, unload it first, then switch to kv260-smartcam.
+
+       ```bash
+      sudo xmutil unloadapp
+      sudo xmutil loadapp kv260-smartcam
+       ```
+
+10. Enable your user to properly use the docker commands without using sudo for every command. 
+
+    ```bash
+    sudo groupadd docker
+    sudo usermod -a -G docker  $USER
+	```
+
+11. Pull the latest docker image for smartcam using the below command.
+
+    ```bash
+    docker pull xilinx/smartcam:latest
+    ```
+
+12. Launch the docker using the below command
+
+    ```bash
+    docker run \
+    --env="DISPLAY" \
+    -h "xlnx-docker" \
+    --env="XDG_SESSION_TYPE" \
+    --net=host \
+    --privileged \
+    --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
+    -v /tmp:/tmp \
+    -v /dev:/dev \
+    -v /sys:/sys \
+    -v /etc/vart.conf:/etc/vart.conf \
+    -v /lib/firmware/xilinx:/lib/firmware/xilinx \
+    -v /run:/run \
+    -it xilinx/smartcam:latest bash
+    ```
+
+    It will launch the smartcam image in a new container
+
+    ```bash
+    root@xlnx-docker/#
+    ```
+
+13. Getting demo video files suitable for the application:
+
+   To be able to demonstrate the function of the application in case you have no MIPI and USB camera in hand, we support the file video source too.
+
+   You can download video files from the following links, which is of MP4 format.
+
+      * [Facedet / RefineDet AI Task](https://pixabay.com/videos/alley-people-walk-street-ukraine-39837/)
+
+      * [ADAS SSD AI Task](https://pixabay.com/videos/freeway-traffic-cars-rainy-truck-8358/)
+
+   Then, you need to transcode it to H264 file which is one supported input format.
   
-  >      ffmpeg -i input-video.mp4 -c:v libx264 -pix_fmt nv12 -r 30 output.nv12.h264
+   ```
+   ffmpeg -i input-video.mp4 -c:v libx264 -pix_fmt nv12 -vf scale=1920:1080 -r 30 output.nv12.h264
+   ```
 
-  Finally, please upload or copy these transcoded H264 files to the board (by using scp, ftp, or copy onto SD card and finding them in /media/sd-mmcblk0p1/), place it to somewhere under /home/petalinux, which is the home directory of the user you login as.
+   Finally, please upload or copy these transcoded H264 files to the board (by using scp, ftp, or copy onto SD card and finding them in /boot/firmware/), place it to somewhere under /tmp, which will mapped to /tmp in the docker container too.
+   
+14. The storage volume on the SD card is limited with multiple dockers. You can use following command to remove the existing container.
+
+	```
+    docker rmi --force smartcam
+	```
 
 # Run the Application
 
@@ -120,22 +240,59 @@ There are two ways to interact with the application.
 
 ## Juypter notebook.
 
-  Use a web-browser (e.g. Chrome, Firefox) to interact with the platform.
+* User need to run following command to install the package shipped notebooks which reside in `/opt/xilinx/kv260-smartcam/share/notebooks` to the folder `$root/notebooks/smartcam`.
 
-  The Jupyter notebook URL can be find with command:
+  ``` $ smartcam-install.py ```
 
-> sudo jupyter notebook list
+  This script also provides more options to install the notebook of current application to specified location.
+
+```
+    usage: smartcam-install [-h] [-d DIR] [-f]
+
+    Script to copy smartcam Jupyter notebook to user directory
+
+    optional arguments:
+      -h, --help         show this help message and exit
+      -d DIR, --dir DIR  Install the Jupyter notebook to the specified directory.
+      -f, --force        Force to install the Jupyter notebook even if the destination directory exists.
+```
+
+* To launch Jupyter notebook on the target, run below command.
+
+``` bash
+    python3 /usr/local/bin/jupyter-lab --notebook-dir=/root/notebooks/smartcam --allow-root --ip=ip-address & 
+    
+	// fill in ip-address from ifconfig 
+```
 
 Output example:
 
-> Currently running servers:
->
-> `http://ip:port/?token=xxxxxxxxxxxxxxxxxx`  ::  /home/petalinux/notebooks
+``` bash
+[I 2022-09-05 10:26:26.644 LabApp] JupyterLab extension loaded from /usr/local/lib/python3.10/dist-packages/jupyterlab
+[I 2022-09-05 10:26:26.644 LabApp] JupyterLab application directory is /usr/local/share/jupyter/lab
+[I 2022-09-05 10:26:26.664 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2022-09-05 10:26:26.683 ServerApp] nbclassic | extension was successfully loaded.
+[I 2022-09-05 10:26:26.685 ServerApp] Serving notebooks from local directory: /root/notebooks/smartcam
+[I 2022-09-05 10:26:26.685 ServerApp] Jupyter Server 1.18.1 is running at:
+[I 2022-09-05 10:26:26.685 ServerApp] http://192.168.1.233:8888/lab?token=385858bbf1e5541dbba08d811bcac67d805b051ef37c6211
+[I 2022-09-05 10:26:26.686 ServerApp]  or http://127.0.0.1:8888/lab?token=385858bbf1e5541dbba08d811bcac67d805b051ef37c6211
+[I 2022-09-05 10:26:26.686 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[W 2022-09-05 10:26:26.702 ServerApp] No web browser found: could not locate runnable browser.
+[C 2022-09-05 10:26:26.703 ServerApp]
+
+    To access the server, open this file in a browser:
+        file:///root/.local/share/jupyter/runtime/jpserver-40-open.html
+    Or copy and paste one of these URLs:
+        http://192.168.1.233:8888/lab?token=385858bbf1e5541dbba08d811bcac67d805b051ef37c6211
+     or http://127.0.0.1:8888/lab?token=385858bbf1e5541dbba08d811bcac67d805b051ef37c6211
+```
+
+* User can access the server by opening the server URL from previous steps with the Chrome browser.
+
+  In the notebook, we will construct the GStreamer pipeline string, you can get it by adding simple python code to print it out, and played with gst-launch-1.0 command in the console, and there are some user options variables that can be changed and run with. For other parts of the pipeline, you can also change and play to see the effect easily.
 
 ## Command line
 These allow the user to define different video input and output device targets using the "smartcam" application. These are to be executed using the UART/debug interface.
-
-**Notice** The application need to be ran with ***sudo*** .
 
 ### Example scripts
 
@@ -147,7 +304,7 @@ Refer to [File Structure](#script-loc) to find the files' location.
 <summary><b>Click here to view the example script usage</b></summary>
 * MIPI RTSP server:
 
-    1. Invoking `"sudo 01.mipi-rtsp.sh"` will start rtsp server for mipi captured images.
+    1. Invoking `"bash 01.mipi-rtsp.sh"` will start rtsp server for mipi captured images.
 
     2. Script accepts ${width} ${height} as the 1st and 2nd parameter, the default is 1920 x 1080.
 
@@ -167,7 +324,7 @@ Refer to [File Structure](#script-loc) to find the files' location.
 
     1. Make sure the monitor is connected as [here](#Setting-up-the-Board).
 
-    2. Invoking `"sudo 02.mipi-dp.sh"` will play the captured video with detection results on monitor.
+    2. Invoking `"bash 02.mipi-dp.sh"` will play the captured video with detection results on monitor.
 
     3. Script accepts ${width} ${height} as the 1st and 2nd parameter, the default is 1920 x 1080.
 
@@ -177,7 +334,7 @@ Refer to [File Structure](#script-loc) to find the files' location.
 
 * File to File
 
-    1. Invoking `"sudo 03.file-to-file.sh"`
+    1. Invoking `"bash 03.file-to-file.sh"`
 
         Take the first argument passed to this script as the path to the video file (you can use the demo video for face detection, or similar videos), perform face detection and generate video with detection bbox, save as `./out.h264`
       
@@ -187,7 +344,7 @@ Refer to [File Structure](#script-loc) to find the files' location.
 
 * File to DP
 
-    1. Invoking `"sudo 04.file-ssd-dp.sh"`
+    1. Invoking `"bash 04.file-ssd-dp.sh"`
 
         Take the first argument passed to this script as the path to the video file (you can use the demo video for ADAS SSD, or similar videos), perform vehicles detection and generate video with detection bbox, and display onto monitor 
       
@@ -257,19 +414,19 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
 
     * output: RTSP
 
-        `sudo smartcam --mipi -W 1920 -H 1080 --target rtsp`
+        `smartcam --mipi -W 1920 -H 1080 --target rtsp`
 
     * output: RTSP with audio <a name="rtsp-audio"> </a>
 
-        `sudo smartcam --mipi -W 1920 -H 1080 --target rtsp --audio`
+        `smartcam --mipi -W 1920 -H 1080 --target rtsp --audio`
 
     * output: DP
 
-        `sudo smartcam --mipi -W 1920 -H 1080 --target dp`
+        `smartcam --mipi -W 1920 -H 1080 --target dp`
 
     * output: file
 
-        `sudo smartcam --mipi -W 1920 -H 1080 --target file `
+        `smartcam --mipi -W 1920 -H 1080 --target file `
 
 * input file (file on file system):
 
@@ -277,15 +434,15 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
 
     * output: RTSP
 
-        `sudo smartcam --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target rtsp `
+        `smartcam --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target rtsp `
 
     * output: DP
 
-        `sudo smartcam --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target dp`
+        `smartcam --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target dp`
 
     * output: file
 
-        `sudo smartcam --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target file`
+        `smartcam --file ./test.h264 -i h264 -W 1920 -H 1080 -r 30 --target file`
 
 * input USB (USB webcam): 
 
@@ -293,15 +450,15 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
 
     * output: RTSP
 
-      `sudo smartcam --usb 1 -W 1920 -H 1080 -r 30 --target rtsp`
+      `smartcam --usb 1 -W 1920 -H 1080 -r 30 --target rtsp`
 
     * output: DP
 
-      `sudo smartcam --usb 1 -W 1920 -H 1080 -r 30 --target dp`
+      `smartcam --usb 1 -W 1920 -H 1080 -r 30 --target dp`
 
     * output: file
 
-      `sudo smartcam --usb 1 -W 1920 -H 1080 -r 30 --target file`
+      `smartcam --usb 1 -W 1920 -H 1080 -r 30 --target file`
 
 # Files structure of the application
 
@@ -320,7 +477,8 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
       |`01.mipi-rtsp.sh` | call smartcam to run facedetction and send out rtsp stream.|
       |`02.mipi-dp.sh`   | call smartcam to run facedetction and display on DP display.|
       |`03.file-file.sh` | call smartcam to run facedetction and display on input h264/5 file and generate output h264/5 with detection boxes.|
-
+      |04.file-ssd-dp.sh| call smartcam to run ssd, process the input h264/5 file and display the results with detection boxes DP display.|
+	  
     * Configuration File Directory: /opt/xilinx/kv260-smartcam/share/vvas/smartcam/${AITASK}
     
       AITASK = "facedetect" | "refinedet" | "ssd"
@@ -331,7 +489,7 @@ If using the command line to invoke the smartcam, stop the process via CTRL-C pr
       |aiinference.json| Config of AI inference (facedetect\|refinedet\|ssd) |
       |drawresult.json| Config of boundbox drawing |
 
-    *  Model files: => /opt/xilinx/kv260-smartcam/share/models
+    *  Model files: => /opt/xilinx/kv260-smartcam/share/vitis-ai-library/models
 
       The model files integrated in the application use the B3136 DPU configuration.
 
