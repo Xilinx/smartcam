@@ -160,7 +160,20 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
 {
     ResizeKernelPriv *kernel_priv;
     kernel_priv = (ResizeKernelPriv *)handle->kernel_priv;
+    LOG_MESSAGE (LOG_LEVEL_INFO, "----------------------------");
+    LOG_MESSAGE (LOG_LEVEL_INFO, "----------------------------");
+    LOG_MESSAGE (LOG_LEVEL_INFO, "----------------------------");
+    LOG_MESSAGE (LOG_LEVEL_INFO, "----------------------------");
+    LOG_MESSAGE (LOG_LEVEL_INFO, "inside the xlnx_kernel_start");
 
+    LOG_MESSAGE (LOG_LEVEL_INFO, "Input width %d", input[0]->props.width);
+    LOG_MESSAGE (LOG_LEVEL_INFO, "Input height %d", input[0]->props.width);
+    LOG_MESSAGE (LOG_LEVEL_INFO, "Input stride %d", input[0]->props.width);
+    LOG_MESSAGE (LOG_LEVEL_INFO, "output width %d", input[0]->props.width);
+    LOG_MESSAGE (LOG_LEVEL_INFO, "output height %d", input[0]->props.width);
+    LOG_MESSAGE (LOG_LEVEL_INFO, "output stride %d", input[0]->props.width);
+	
+	
     int ret = vvas_kernel_start (handle, "ppppuuuuuu", 
         (input[0]->paddr[0]),
         (input[0]->paddr[1]),
@@ -184,7 +197,11 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
       LOG_MESSAGE (LOG_LEVEL_ERROR, "Preprocess: failed to receive response from kernel");
       return ret;
     }
-
+    LOG_MESSAGE (LOG_LEVEL_INFO, "-----done with kernel-------");
+    LOG_MESSAGE (LOG_LEVEL_INFO, "----------------------------");
+    LOG_MESSAGE (LOG_LEVEL_INFO, "----------------------------");
+    LOG_MESSAGE (LOG_LEVEL_INFO, "----------------------------");
+    LOG_MESSAGE (LOG_LEVEL_INFO, "----------------------------");
     return 0;
 }
 
