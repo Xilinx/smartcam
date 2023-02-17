@@ -181,7 +181,7 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         (kernel_priv->params->paddr[0]),
         (input[0]->props.width),
         (input[0]->props.height),
-        (input[0]->props.stride),
+        (256),
         (output[0]->props.width),
         (output[0]->props.height),
         (output[0]->props.width)
