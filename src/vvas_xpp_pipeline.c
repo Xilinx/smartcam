@@ -169,11 +169,10 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     LOG_MESSAGE (LOG_LEVEL_INFO, "Input width %d", input[0]->props.width);
     LOG_MESSAGE (LOG_LEVEL_INFO, "Input height %d", input[0]->props.height);
     LOG_MESSAGE (LOG_LEVEL_INFO, "Input stride %d", input[0]->props.stride);
-    LOG_MESSAGE (LOG_LEVEL_INFO, "Input stride has been reset to the following ****** %d", 0);
+    LOG_MESSAGE (LOG_LEVEL_INFO, "Input stride has been reset to the following ****** %d", 256);
     LOG_MESSAGE (LOG_LEVEL_INFO, "output width %d", output[0]->props.width);
     LOG_MESSAGE (LOG_LEVEL_INFO, "output height %d", output[0]->props.height);
     LOG_MESSAGE (LOG_LEVEL_INFO, "output stride %d", output[0]->props.width);
-    LOG_MESSAGE (LOG_LEVEL_INFO, "output stride has been reset to the following ******  %d", 0);	
 	
     int ret = vvas_kernel_start (handle, "ppppuuuuuu", 
         (input[0]->paddr[0]),
@@ -182,10 +181,10 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         (kernel_priv->params->paddr[0]),
         (input[0]->props.width),
         (input[0]->props.height),
-        (0),
+        (256),
         (output[0]->props.width),
         (output[0]->props.height),
-        (0)
+        (output[0]->props.width)
         );
     if (ret < 0) {
       LOG_MESSAGE (LOG_LEVEL_ERROR, "Preprocess: failed to issue execute command");
