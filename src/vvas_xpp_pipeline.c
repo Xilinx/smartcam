@@ -169,6 +169,7 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     LOG_MESSAGE (LOG_LEVEL_INFO, "Input width %d", input[0]->props.width);
     LOG_MESSAGE (LOG_LEVEL_INFO, "Input height %d", input[0]->props.height);
     LOG_MESSAGE (LOG_LEVEL_INFO, "Input stride %d", input[0]->props.stride);
+    LOG_MESSAGE (LOG_LEVEL_INFO, "Input stride has been reset to the following ****** %d", 256);
     LOG_MESSAGE (LOG_LEVEL_INFO, "output width %d", output[0]->props.width);
     LOG_MESSAGE (LOG_LEVEL_INFO, "output height %d", output[0]->props.height);
     LOG_MESSAGE (LOG_LEVEL_INFO, "output stride %d", output[0]->props.width);
