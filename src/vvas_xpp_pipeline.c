@@ -181,10 +181,10 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
         (kernel_priv->params->paddr[0]),
         (input[0]->props.width),
         (input[0]->props.height),
-        (input[0]->props.width),
+        (input[0]->props.stride),
         (output[0]->props.width),
         (output[0]->props.height),
-        (output[0]->props.width)
+        (768)
         );
     if (ret < 0) {
       LOG_MESSAGE (LOG_LEVEL_ERROR, "Preprocess: failed to issue execute command");
