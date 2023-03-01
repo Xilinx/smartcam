@@ -76,18 +76,18 @@ uint32_t xlnx_kernel_deinit(VVASKernel *handle)
 
 int32_t xlnx_kernel_init(VVASKernel *handle)
 {
-    json_t *jconfig = handle->kernel_config;
-    json_t *val; /* kernel config from app */
-    ResizeKernelPriv *kernel_priv;
-    float *pPtr; 
+   // json_t *jconfig = handle->kernel_config;
+   // json_t *val; /* kernel config from app */
+   // ResizeKernelPriv *kernel_priv;
+   // float *pPtr; 
 
     handle->is_multiprocess = 0;
-    kernel_priv = (ResizeKernelPriv *)calloc(1, sizeof(ResizeKernelPriv));
+  /*  kernel_priv = (ResizeKernelPriv *)calloc(1, sizeof(ResizeKernelPriv));
     if (!kernel_priv) {
         printf("Error: Unable to allocate resize kernel memory\n");
     }
 
-    /* parse config */
+    /* parse config 
     val = json_object_get(jconfig, "mean_r");
     if (!val || !json_is_number(val))
         kernel_priv->mean_r = 0;
@@ -112,7 +112,7 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
     }
     printf("Resize: mean_b=%f\n", kernel_priv->mean_b);
 
-    /* parse config */
+    /* parse config 
     val = json_object_get(jconfig, "scale_r");
     if (!val || !json_is_number(val))
 	kernel_priv->scale_r = 1;
@@ -152,7 +152,7 @@ int32_t xlnx_kernel_init(VVASKernel *handle)
     pPtr[5] = (float)kernel_priv->scale_b;  
 
     handle->kernel_priv = (void *)kernel_priv;
-
+*/
     return 0;
 }
 
@@ -174,17 +174,17 @@ int32_t xlnx_kernel_start(VVASKernel *handle, int start, VVASFrame *input[MAX_NU
     LOG_MESSAGE (LOG_LEVEL_INFO, "output height %d", output[0]->props.height);
     LOG_MESSAGE (LOG_LEVEL_INFO, "output stride %d", output[0]->props.width);
 	
-    int ret = vvas_kernel_start (handle, "ppppuuuuuu", 
+    int ret = vvas_kernel_start (handle, "pppuuuuuu", 
         (input[0]->paddr[0]),
         (input[0]->paddr[1]),
         (output[0]->paddr[0]),
-        (kernel_priv->params->paddr[0]),
+     //   (kernel_priv->params->paddr[0]),
         (input[0]->props.width),
         (input[0]->props.height),
         (input[0]->props.stride),
         (output[0]->props.width),
         (output[0]->props.height),
-        (768)
+        (output[0]->props.width)
         );
     if (ret < 0) {
       LOG_MESSAGE (LOG_LEVEL_ERROR, "Preprocess: failed to issue execute command");
