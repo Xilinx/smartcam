@@ -1,14 +1,14 @@
 {
   "xclbin-location":"/lib/firmware/xilinx/kv260-smartcam/kv260-smartcam.xclbin",
-  "ivas-library-repo": "/usr/lib/",
+  "vvas-library-repo": "/usr/lib/",
   "element-mode":"inplace",
   "kernels" :[
     {
-      "library-name":"libivas_xdpuinfer.so",
+      "library-name":"libvvas_xdpuinfer.so",
       "config": {
         "model-name" : "ssd_adas_pruned_0_95",
         "model-class" : "SSD",
-        "model-path" : "/opt/xilinx/share/vitis_ai_library/models/kv260-smartcam",
+        "model-path" : "/opt/xilinx/kv260-smartcam/share/vitis_ai_library/models/",
         "run_time_model" : false,
         "need_preprocess" : false,
         "performance_test" : false,

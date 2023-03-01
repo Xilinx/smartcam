@@ -27,21 +27,21 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(GStreamer REQUIRED)
 find_package(OpenCV REQUIRED)
 
-SET(INSTALL_PATH "opt/xilinx")
+SET(INSTALL_PATH "opt/xilinx/kv260-smartcam")
 
-add_library(ivas_xpp SHARED src/ivas_xpp_pipeline.c)
-target_include_directories(ivas_xpp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(ivas_xpp
-  jansson ivasutil gstivasinfermeta-1.0)
-install(TARGETS ivas_xpp DESTINATION ${INSTALL_PATH}/lib)
+add_library(vvas_xpp SHARED src/vvas_xpp_pipeline.c)
+target_include_directories(vvas_xpp PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(vvas_xpp
+  jansson vvasutil-2.0 gstvvasinfermeta-2.0)
+install(TARGETS vvas_xpp DESTINATION ${INSTALL_PATH}/lib)
 
-add_library(ivas_airender SHARED src/ivas_airender.cpp)
-target_include_directories(ivas_airender PRIVATE ${GSTREAMER_INCLUDE_DIRS})
-target_link_libraries(ivas_airender 
-    jansson ivasutil gstivasinfermeta-1.0 
+add_library(vvas_airender SHARED src/vvas_airender.cpp)
+target_include_directories(vvas_airender PRIVATE ${GSTREAMER_INCLUDE_DIRS})
+target_link_libraries(vvas_airender 
+    jansson vvasutil-2.0 gstvvasinfermeta-2.0 
     gstreamer-1.0 gstbase-1.0 glib-2.0
     opencv_core opencv_video opencv_videoio opencv_imgproc)
-install(TARGETS ivas_airender DESTINATION ${INSTALL_PATH}/lib)
+install(TARGETS vvas_airender DESTINATION ${INSTALL_PATH}/lib)
 
 
 add_executable(${CMAKE_PROJECT_NAME} src/main.cpp)
@@ -70,16 +70,17 @@ install(DIRECTORY
     config/facedetect
     config/refinedet
     config/ssd
-    DESTINATION ${INSTALL_PATH}/share/ivas/${CMAKE_PROJECT_NAME}/)
+    DESTINATION ${INSTALL_PATH}/share/vvas/)
 
-install(FILES
-    config/ssd/label.json
-    DESTINATION ${INSTALL_PATH}/share/vitis_ai_library/models/kv260-${CMAKE_PROJECT_NAME}/ssd_adas_pruned_0_95/
-    )
+install(DIRECTORY
+    models/kv260/densebox_640_360
+	models/kv260/refinedet_pruned_0_96
+	models/kv260/ssd_adas_pruned_0_95
+    DESTINATION ${INSTALL_PATH}/share/vitis_ai_library/models/)
 
 install(DIRECTORY
     notebook/
-    DESTINATION ${INSTALL_PATH}/share/notebooks/${CMAKE_PROJECT_NAME}/)
+    DESTINATION ${INSTALL_PATH}/share/notebooks/)
 
 set(VERSION "1.0.1")
 set(CPACK_PACKAGE_VERSION ${VERSION})

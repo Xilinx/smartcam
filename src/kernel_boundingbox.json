@@ -1,10 +1,10 @@
 {
   "xclbin-location":"/usr/lib/dpu.xclbin",
-  "ivas-library-repo": "/usr/local/lib/ivas",
+  "vvas-library-repo": "/usr/local/lib/vvas",
   "element-mode":"inplace",
   "kernels" :[
     {
-      "library-name":"libivas_xboundingbox.so",
+      "library-name":"libvvas_xboundingbox.so",
       "config": {
 	"font_size" : 0.5,
 	"font" : 3,
